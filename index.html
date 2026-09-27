@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"></head><body style="margin:0">
+<title>Turtle Squares 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#BFEFF2; --sky:#A6E6F0; --sea:#2DB7BA; --sea-deep:#157FA3; --foam:#FFFFFF;
+  --sand:#F7D98A; --sand-deep:#E8BD5E; --coral:#FF6B7F; --coral-deep:#E04A60;
+  --sun:#FFC93C; --gold:#FFB61E; --leaf:#46A65A; --purple:#7B5CD6; --purple-deep:#5E42B8;
+  --ink:#13344A; --muted:#48677A; --fence:#C98B4E; --fence-deep:#8B5E34; --grass:#7CC46A;
+  --panel:#FFFFFF; --panel-2:#E6F8F7; --line:#BFE3E4; --good:#2FA36B; --bad:#E04A60;
+  --sil:#9CC7CC; --shadow:0 6px 0 rgba(19,52,74,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0D2342; --sky:#1B3566; --sea:#17657F; --sea-deep:#0C3F5C; --foam:#BFD8EA;
+    --sand:#B9A06A; --sand-deep:#8F7A4C; --coral:#FF7B8D; --coral-deep:#E45A70;
+    --sun:#F3EFC4; --gold:#F2B33A; --leaf:#3C8E4E; --purple:#8A6CE8; --purple-deep:#6A4FD0;
+    --ink:#EAF5FF; --muted:#A8C3D8; --fence:#8F6A45; --fence-deep:#5E4128; --grass:#4F8E48;
+    --panel:#15314F; --panel-2:#1C4063; --line:#2A5378; --good:#4CC98C; --bad:#FF7B8D;
+    --sil:#3A6384; --shadow:0 6px 0 rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0D2342; --sky:#1B3566; --sea:#17657F; --sea-deep:#0C3F5C; --foam:#BFD8EA;
+  --sand:#B9A06A; --sand-deep:#8F7A4C; --coral:#FF7B8D; --coral-deep:#E45A70;
+  --sun:#F3EFC4; --gold:#F2B33A; --leaf:#3C8E4E; --purple:#8A6CE8; --purple-deep:#6A4FD0;
+  --ink:#EAF5FF; --muted:#A8C3D8; --fence:#8F6A45; --fence-deep:#5E4128; --grass:#4F8E48;
+  --panel:#15314F; --panel-2:#1C4063; --line:#2A5378; --good:#4CC98C; --bad:#FF7B8D;
+  --sil:#3A6384; --shadow:0 6px 0 rgba(0,0,0,.3);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font:600 17px/1.5 'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
+h1,h2,h3{font-family:'Baloo 2','Nunito',system-ui,sans-serif;line-height:1.1;margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+svg{max-width:100%}
+.app{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:14px 40px}
+.screen[hidden]{display:none!important}
+.muted{color:var(--muted)}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin:4px 0 12px}
+.brand h1{font-size:clamp(30px,6vw,46px);font-weight:800;letter-spacing:-.5px}
+.brand .two{display:inline-grid;place-items:center;background:var(--coral);color:#fff;border-radius:.3em;width:1.15em;height:1.15em;font-size:.72em;vertical-align:.18em;transform:rotate(-8deg);margin-left:4px;box-shadow:0 4px 0 var(--coral-deep)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.row.center{justify-content:center}
+.pill{background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:5px 13px;font-weight:800;white-space:nowrap;box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
+.pill.coins{background:color-mix(in srgb,var(--gold) 22%,var(--panel));border-color:color-mix(in srgb,var(--gold) 60%,var(--line))}
+.iconbtn{background:var(--panel);border:2px solid var(--line);border-radius:14px;width:44px;height:44px;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow);flex:none}
+.iconbtn:active{transform:translateY(3px);box-shadow:none}
+
+/* pen scene */
+.scene{position:relative;border-radius:34px 34px 46px 46px;overflow:hidden;aspect-ratio:16/10;max-width:100%;border:4px solid var(--panel);box-shadow:0 10px 0 rgba(19,52,74,.12);user-select:none;-webkit-user-select:none}
+.scene-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sun{position:absolute;right:6%;top:2.5%;width:8%;max-width:70px;aspect-ratio:1;border-radius:50%;background:var(--sun);box-shadow:0 0 0 8px color-mix(in srgb,var(--sun) 30%,transparent)}
+.sign{position:absolute;left:2%;top:25%;width:19%;max-width:170px;pointer-events:none}
+.stage{position:absolute;inset:0}
+.penhelp{color:var(--muted);font-size:14px;font-weight:700;margin:10px 4px 0;text-align:center}
+.alert{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--bad);color:#fff;padding:6px 16px;border-radius:999px;font-weight:800;z-index:7000;width:max-content;max-width:92%;text-align:center;font-size:clamp(12px,2vw,15px);line-height:1.3;box-shadow:0 4px 0 rgba(0,0,0,.2);animation:pulse .8s ease-in-out infinite alternate;pointer-events:none}
+@keyframes pulse{to{transform:translateX(-50%) scale(1.04)}}
+
+/* turtles in the pen */
+.wander{position:absolute;width:clamp(52px,9vw,88px);background:none;border:0;padding:0;transform:translate(-50%,-86%);display:flex;flex-direction:column;align-items:center;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+.wander .wbody{display:block;width:100%;transition:transform .2s}
+.wander .wflip{display:block;transition:transform .25s}
+.wander.left .wflip{transform:scaleX(-1)}
+.wander.held{cursor:grabbing}
+.wander.held .wbody{transform:scale(1.18) rotate(-6deg);filter:drop-shadow(0 14px 5px rgba(0,0,0,.25))}
+.wander.hop .wbody{animation:hop .32s ease-in-out infinite alternate}
+.wander.fighting .wbody{animation:tussle .14s linear infinite}
+@keyframes hop{to{transform:translateY(-14%)}}
+@keyframes tussle{25%{transform:translate(-4px,-2px) rotate(-6deg)}75%{transform:translate(4px,1px) rotate(6deg)}}
+.wander .wname{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:700;font-size:clamp(10px,1.6vw,13px);background:color-mix(in srgb,var(--panel) 85%,transparent);border-radius:999px;padding:0 7px;margin-top:-8px;white-space:nowrap;color:var(--ink);pointer-events:none}
+.wander .zz{position:absolute;right:-2px;top:6%;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;color:var(--ink);opacity:0;transition:opacity .4s;pointer-events:none;font-size:13px}
+.wander.resting .zz{opacity:.85}
+.speech{position:absolute;left:50%;bottom:calc(100% - 6px);transform:translate(-50%,6px);background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:4px 9px;font:800 12.5px/1.25 'Nunito',system-ui,sans-serif;width:max-content;max-width:min(190px,46vw);text-align:center;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 3px 0 rgba(19,52,74,.12)}
+.speech.on{opacity:1;transform:translate(-50%,0)}
+.speech::after{content:'';position:absolute;left:50%;top:100%;border:7px solid transparent;border-top-color:var(--line);transform:translateX(-50%)}
+.speech[data-edge="r"]{transform:translate(-85%,6px)}.speech[data-edge="r"].on{transform:translate(-85%,0)}.speech[data-edge="r"]::after{left:85%}
+.speech[data-edge="l"]{transform:translate(-15%,6px)}.speech[data-edge="l"].on{transform:translate(-15%,0)}.speech[data-edge="l"]::after{left:15%}
+
+/* turtle art */
+.turtle-svg{display:block;width:100%;height:auto;overflow:visible}
+.turtle-svg .ff,.turtle-svg .fb{transform-box:fill-box;transform-origin:30% 50%}
+.turtle-svg .headg{transform-box:fill-box;transform-origin:20% 60%;transition:transform .3s}
+.walking .turtle-svg .ff{animation:paddle .45s ease-in-out infinite alternate}
+.walking .turtle-svg .fb{animation:paddle .45s ease-in-out infinite alternate-reverse}
+.hiding .turtle-svg .headg{transform:translate(-12px,5px) scale(.55)}
+@keyframes paddle{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
+.turtle-svg .fc{display:none}
+.turtle-svg .fc-norm{display:inline}
+[data-mood="happy"] .fc-norm,[data-mood="angry"] .fc-norm,[data-mood="sad"] .fc-norm,[data-mood="sleep"] .fc-norm{display:none}
+[data-mood="happy"] .fc-happy,[data-mood="angry"] .fc-angry,[data-mood="sad"] .fc-sad,[data-mood="sleep"] .fc-sleep{display:inline}
+.turtle-svg .prop{transform-box:fill-box;transform-origin:center;animation:spin .35s linear infinite}
+.turtle-svg .wing{transform-box:fill-box;transform-origin:50% 100%;animation:flutter .5s ease-in-out infinite alternate}
+.turtle-svg .bob{animation:bob 1.6s ease-in-out infinite alternate}
+.turtle-svg .flame{animation:flick .15s linear infinite alternate}
+.turtle-svg .glint{animation:glint 1.6s ease-in-out infinite alternate}
+@keyframes spin{50%{transform:scaleX(.1)}}
+@keyframes flutter{to{transform:scaleY(.8) rotate(-4deg)}}
+@keyframes bob{to{transform:translateY(-3px)}}
+@keyframes flick{to{opacity:.5}}
+@keyframes glint{from{opacity:.2}to{opacity:1}}
+
+/* pen items */
+.pitem{position:absolute;background:none;border:0;padding:0;line-height:1;transform:translate(-50%,-90%);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;filter:drop-shadow(0 3px 0 rgba(19,52,74,.18))}
+.pitem.furn{font-size:clamp(36px,6.8vw,66px)}
+.pitem.toy{font-size:clamp(22px,4vw,38px)}
+.pitem.inuse{animation:toyfun .45s ease-in-out infinite alternate}
+.pitem.dragging{transform:translate(-50%,-100%) scale(1.15);cursor:grabbing;animation:none}
+@keyframes toyfun{from{transform:translate(-50%,-90%) rotate(-10deg)}to{transform:translate(-50%,-115%) rotate(10deg)}}
+.brawl{position:absolute;transform:translate(-50%,-105%);width:clamp(76px,13vw,130px);height:clamp(52px,9vw,88px);pointer-events:none}
+.brawl::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.85),rgba(255,255,255,0));animation:dust .3s ease-in-out infinite alternate}
+.brawl span{position:absolute;font-size:clamp(18px,3.4vw,32px);animation:brawl .45s linear infinite}
+.brawl span:nth-child(1){left:8%;top:18%}.brawl span:nth-child(2){left:55%;top:5%;animation-delay:-.15s}.brawl span:nth-child(3){left:32%;top:45%;animation-delay:-.3s}.brawl span:nth-child(4){left:70%;top:48%;animation-delay:-.2s}
+@keyframes brawl{50%{transform:scale(1.3) rotate(25deg)}}
+@keyframes dust{to{transform:scale(1.12)}}
+.fx{position:absolute;transform:translate(-50%,0);font-size:22px;pointer-events:none;animation:fxup 1.3s ease-out forwards;z-index:6000}
+@keyframes fxup{to{transform:translate(-50%,-60px) scale(1.3);opacity:0}}
+
+/* home actions */
+.actions{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:12px;margin-top:16px}
+.bigbtn{border:0;border-radius:24px;padding:14px;text-align:left;box-shadow:0 6px 0 rgba(19,52,74,.22);display:flex;flex-direction:column;gap:2px;min-height:96px}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(19,52,74,.22)}
+.bigbtn .ico{font-size:28px;line-height:1}
+.bigbtn b{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-size:21px;line-height:1.1}
+.bigbtn small{font-weight:700;opacity:.9;font-size:14px;line-height:1.3}
+.b-rescue{background:var(--coral);color:#fff}
+.b-shop{background:var(--sun);color:#3A2A00}
+.b-book{background:var(--leaf);color:#fff}
+.b-academy{background:var(--purple);color:#fff}
+@media (max-width:640px){
+  .actions{grid-template-columns:1fr 1fr}
+  .scene{aspect-ratio:4/5}
+  .brand h1{font-size:30px}
+  .pill{font-size:14px;padding:4px 10px}
+}
+
+/* panels & buttons */
+.head{display:flex;align-items:center;gap:12px;margin:6px 0 14px;flex-wrap:wrap}
+.head h2{font-size:clamp(26px,5vw,36px);flex:1}
+.sub{color:var(--muted);margin:0 0 14px;max-width:64ch}
+.panel{background:var(--panel);border:2px solid var(--line);border-radius:26px;padding:18px;box-shadow:var(--shadow)}
+.btn{border:0;border-radius:18px;padding:12px 20px;font-weight:800;font-size:18px;background:var(--coral);color:#fff;box-shadow:0 5px 0 var(--coral-deep)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--coral-deep)}
+.btn.alt{background:var(--panel-2);color:var(--ink);box-shadow:0 5px 0 var(--line)}
+.btn.alt:active{box-shadow:0 1px 0 var(--line)}
+.tipbox{background:var(--panel-2);border-radius:18px;padding:12px 16px;margin:12px 0;border-left:6px solid var(--sun)}
+
+/* missions */
+.levels{display:flex;flex-direction:column;gap:12px}
+.level{display:grid;grid-template-columns:52px 1fr;column-gap:14px;row-gap:6px;align-items:center;border:0;border-radius:24px;padding:14px 18px;text-align:left;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.level:nth-child(even){margin-left:clamp(0px,5vw,56px)}
+.level:nth-child(odd){margin-right:clamp(0px,5vw,56px)}
+.level .num{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.28);display:grid;place-items:center;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:24px}
+.level b{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-size:22px;display:block;line-height:1.1}
+.level small{font-weight:700;opacity:.92;font-size:14px}
+.lv-foot{grid-column:2;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.prizes{display:flex;gap:6px}
+.pz{display:flex;flex-direction:column;align-items:center;width:52px;background:rgba(255,255,255,.22);border-radius:14px;padding:3px 2px 1px}
+.pz .pzt{width:46px}
+.pz small{font-size:11px;line-height:1;letter-spacing:1px}
+.level .stars{font-size:22px;letter-spacing:2px;white-space:nowrap;color:var(--sun)}
+.level[disabled]{filter:saturate(.25) brightness(.95);cursor:not-allowed;opacity:.75}
+.level:not([disabled]):active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.depth-note{display:flex;justify-content:space-between;color:var(--muted);font-weight:800;margin:4px 6px 10px;font-size:14px}
+
+/* intro */
+.intro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.prizecard{background:var(--panel-2);border-radius:18px;padding:8px 8px 10px;text-align:center}
+.prizecard .pic{width:min(110px,100%);margin:0 auto}
+.prizecard b{display:block;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-size:17px;line-height:1.15}
+.prizecard small{color:var(--muted);font-weight:800}
+.prizecard .st{color:var(--gold);font-size:18px;letter-spacing:2px}
+.rules{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px}
+
+/* game */
+.gamebar{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:10px}
+.gamebar .pill{box-shadow:none}
+.meter{position:relative;height:26px;background:var(--panel);border:2px solid var(--line);border-radius:999px;margin:18px 6px 10px}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--sea),var(--leaf));width:0;transition:width .5s cubic-bezier(.3,1.4,.5,1)}
+.meter .mark{position:absolute;top:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;background:var(--panel);border:3px solid var(--line);display:grid;place-items:center;font-size:18px;filter:grayscale(1);opacity:.8;transition:all .3s}
+.meter .mark.on{filter:none;opacity:1;border-color:var(--gold);transform:translate(-50%,-50%) scale(1.14)}
+.bonus{position:relative;height:24px;background:var(--panel-2);border-radius:999px;overflow:hidden;margin:6px 6px 0;border:2px solid var(--line)}
+.bonus i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold),var(--sun));border-radius:999px;width:100%}
+.bonus span{position:relative;display:block;text-align:center;font-weight:800;font-size:13px;line-height:20px;color:var(--ink)}
+.bonus.gone i{width:0!important}
+.under{position:relative;height:150px;border-radius:26px;margin:12px 0;overflow:hidden;background:linear-gradient(var(--sea),var(--sea-deep));display:flex;align-items:center;justify-content:center}
+.under .rays{position:absolute;inset:0;background:repeating-linear-gradient(105deg,rgba(255,255,255,.08) 0 30px,transparent 30px 80px)}
+.under .weed{position:absolute;bottom:-4px;width:70px;opacity:.9}
+.trapped{position:relative;width:160px;transition:transform .8s ease-in,opacity .8s}
+.trapped .net{position:absolute;inset:18% -4% -2%;transition:opacity .4s}
+.trapped.free{transform:translate(260px,-40px) rotate(-10deg);opacity:0}
+.trapped.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px) rotate(-2deg)}75%{transform:translateX(5px) rotate(2deg)}}
+.under .tag{position:absolute;left:12px;top:10px;right:120px;background:rgba(255,255,255,.92);color:#13344A;border-radius:14px;padding:2px 12px;font-weight:800;font-size:14px;width:max-content;max-width:calc(100% - 140px);z-index:2}
+.under .combo{position:absolute;right:12px;top:10px;background:var(--sun);color:#3A2A00;border-radius:999px;padding:2px 12px;font-weight:800;font-size:14px;opacity:0;transition:opacity .3s;z-index:2}
+.under .combo.on{opacity:1}
+.qcard{background:var(--panel);border:2px solid var(--line);border-radius:28px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+.qtext{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:clamp(46px,11vw,78px);line-height:1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.qtext sup{font-size:.5em;color:var(--coral)}
+.qtext.mid{font-size:clamp(38px,9vw,66px)}
+.qtext.small{font-size:clamp(32px,7vw,50px)}
+.clue{display:inline-block;background:color-mix(in srgb,var(--sun) 25%,var(--panel));border:2px dashed var(--gold);border-radius:14px;padding:3px 14px;font-weight:800;font-size:18px;margin:6px 0 0}
+.qhelp{color:var(--muted);font-weight:700;min-height:1.5em}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.opt{border:0;border-radius:20px;padding:14px;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:34px;background:var(--panel-2);color:var(--ink);box-shadow:0 5px 0 var(--line)}
+.opt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--line)}
+.opt.right{background:var(--good);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.opt.wrong{background:var(--bad);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.display{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:44px;background:var(--panel-2);border-radius:18px;min-height:66px;margin-top:12px;display:flex;align-items:center;justify-content:center;letter-spacing:2px;border:3px dashed var(--line)}
+.display.right{border:3px solid var(--good);color:var(--good)}
+.display.wrong{border:3px solid var(--bad);color:var(--bad)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.pad button{border:0;border-radius:16px;padding:10px 0;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:28px;background:var(--panel-2);color:var(--ink);box-shadow:0 4px 0 var(--line)}
+.pad button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.pad .go{background:var(--good);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.feedback{margin-top:14px;border-radius:20px;padding:14px 16px;text-align:left;background:color-mix(in srgb,var(--bad) 14%,var(--panel));border:2px solid var(--bad)}
+.feedback h3{font-size:24px;margin-bottom:4px}
+.floaty{position:fixed;pointer-events:none;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:28px;color:var(--good);animation:floatup 1s ease-out forwards;z-index:999}
+.floaty.fast{color:var(--gold)}
+@keyframes floatup{to{transform:translateY(-60px);opacity:0}}
+
+/* results */
+.bigstars{font-size:56px;letter-spacing:6px;text-align:center;margin:6px 0;color:var(--gold)}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.stat{background:var(--panel-2);border-radius:18px;padding:10px;text-align:center}
+.stat b{display:block;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-weight:700;font-size:14px}
+.coinbox{background:color-mix(in srgb,var(--gold) 18%,var(--panel));border:2px solid color-mix(in srgb,var(--gold) 55%,var(--line));border-radius:20px;padding:12px 16px;margin:10px 0}
+.coinbox h3{font-size:24px}
+.coinbox table{border-collapse:collapse;width:100%;max-width:360px;font-variant-numeric:tabular-nums}
+.coinbox td{padding:2px 0}.coinbox td:last-child{text-align:right;font-weight:800}
+.meet{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center;background:var(--panel-2);border-radius:22px;padding:12px;margin:10px 0}
+.meet h3{font-size:24px}
+.review li{margin:6px 0}
+
+/* book */
+.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:10px 10px 12px;text-align:center;box-shadow:var(--shadow)}
+.card.locked{background:var(--panel-2);box-shadow:none;border-style:dashed}
+.card h3{font-size:19px}
+.card small{color:var(--muted);font-weight:700;display:block;line-height:1.3}
+
+/* shop */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 14px;font-weight:800;font-size:15px}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.shop-h{font-size:22px;margin:16px 0 8px}
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.icard{background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:10px 10px 12px;display:flex;flex-direction:column;gap:3px;text-align:center;box-shadow:var(--shadow)}
+.icard b{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-size:18px;line-height:1.15}
+.icard small{color:var(--muted);font-weight:700;font-size:13px;line-height:1.3}
+.icard small.meta{color:var(--ink)}
+.icard .need{font-size:12px}
+.ipic{height:84px;display:grid;place-items:center}
+.ipic.t{width:110px;margin:0 auto}
+.ipic.e{font-size:54px;line-height:1}
+.buy{margin-top:auto;border:0;border-radius:14px;padding:8px 10px;font-weight:800;background:var(--gold);color:#3A2A00;box-shadow:0 4px 0 color-mix(in srgb,var(--gold) 55%,#000)}
+.buy:active{transform:translateY(3px);box-shadow:0 1px 0 color-mix(in srgb,var(--gold) 55%,#000)}
+.buy[disabled]{background:var(--panel-2);color:var(--muted);box-shadow:none;cursor:default}
+.buy.owned{background:color-mix(in srgb,var(--good) 20%,var(--panel));color:var(--good)}
+.storelist{display:grid;gap:8px}
+.storerow{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:8px 12px;flex-wrap:wrap}
+.storerow .em{font-size:34px;line-height:1}
+.storerow .nm{flex:1;min-width:120px}
+.storerow .btn{font-size:15px;padding:7px 12px}
+
+/* academy */
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.lesson-btn{border:2px solid var(--line);background:var(--panel);border-radius:22px;padding:14px;text-align:left;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow)}
+.lesson-btn .ico{font-size:30px}
+.lesson-btn b{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-size:19px;line-height:1.15;display:block}
+.lesson-btn small{color:var(--muted);font-weight:700}
+.lesson-btn.done{border-color:var(--good)}
+.lesson-body{max-width:66ch}
+.lesson-body p{margin:.5em 0}
+.bigline{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:22px;margin:4px 0;line-height:1.3}
+.eggs{display:grid;gap:3px;margin:10px 0;width:min(100%,300px)}
+.eggs i{aspect-ratio:1;border-radius:50% 50% 46% 46%/58% 58% 42% 42%;background:#FFF6E0;border:2px solid var(--sand-deep)}
+.eggs i.extra{background:#FF9DB0;border-color:var(--coral-deep)}
+input[type=range]{width:min(100%,320px);accent-color:var(--coral)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.chip{background:var(--panel-2);border-radius:12px;padding:4px 10px;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:20px}
+.chips .plus{color:var(--coral);font-weight:800;font-size:14px}
+.area{display:grid;gap:4px;width:min(100%,300px);aspect-ratio:1;margin:10px 0}
+.area div{display:grid;place-items:center;border-radius:8px;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;color:#13344A;font-size:16px;overflow:hidden}
+.tblwrap{overflow-x:auto}
+.tbl{border-collapse:collapse;margin:10px 0;font-weight:800;font-variant-numeric:tabular-nums}
+.tbl td,.tbl th{padding:6px 12px;border-bottom:2px solid var(--line);text-align:left}
+.flipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;margin-top:10px}
+.flip{border-radius:18px;height:78px;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:28px;background:var(--panel);color:var(--ink);box-shadow:var(--shadow);border:2px solid var(--line)}
+.flip.shown{background:var(--sea);color:#fff;border-color:var(--sea)}
+.flip sup{font-size:.55em}
+
+/* modal & turtle card */
+.modal{position:fixed;inset:0;background:rgba(8,30,50,.55);display:grid;place-items:center;padding:20px 16px;z-index:9000}
+.modal[hidden]{display:none}
+.modal .panel{max-width:460px;width:100%;text-align:center;max-height:90vh;overflow:auto}
+.modal .panel.wide{max-width:580px;text-align:left}
+.modal .big-t{width:200px;margin:0 auto}
+.modal h2{font-size:32px}
+.bigemoji{font-size:84px;line-height:1.1}
+.tc-top{display:grid;grid-template-columns:170px 1fr;gap:14px;align-items:center}
+.tc-top .big-t{width:170px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.tag2{background:var(--panel-2);border-radius:999px;padding:2px 10px;font-weight:800;font-size:14px}
+.mood{font-weight:700}
+.hearts{color:var(--coral);letter-spacing:2px}
+.cardsay{background:var(--panel-2);border-radius:16px;padding:8px 12px;font-weight:800;margin:10px 0 0}
+.ptip{color:var(--muted);font-size:15px}
+.fav{background:var(--panel-2);border-radius:18px;padding:10px 14px;margin:12px 0}
+.slot{margin:8px 0}
+.slot>b{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.wchip{border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 12px;font-weight:800;font-size:14px}
+.wchip.on{background:var(--sea);border-color:var(--sea);color:#fff}
+.tc-sec{font-size:22px;margin:14px 0 4px}
+@media (max-width:520px){.tc-top{grid-template-columns:1fr;text-align:center}.tc-top .big-t{width:150px}.tc-top .tags{justify-content:center}.intro-grid{grid-template-columns:repeat(3,1fr);gap:6px}.prizecard b{font-size:14px}}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:800;z-index:9500;max-width:calc(100% - 32px);width:max-content;text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.party{position:fixed;inset:0;pointer-events:none;z-index:9600;overflow:hidden}
+.party span{position:absolute;bottom:-40px;font-size:28px;animation:rise 2.2s ease-out forwards}
+@keyframes rise{to{transform:translateY(-110vh) rotate(40deg);opacity:0}}
+
+@media (prefers-reduced-motion: reduce){
+  .walking .turtle-svg .ff,.walking .turtle-svg .fb,.turtle-svg .prop,.turtle-svg .wing,.turtle-svg .bob,.turtle-svg .flame,.turtle-svg .glint,.alert,.brawl span,.brawl::before{animation:none}
+  .wander.hop .wbody,.wander.fighting .wbody,.pitem.inuse{animation:none}
+  .party{display:none}
+  .trapped,.meter .fill{transition:none}
+}
+</style>
+
+<div class="app">
+
+  <!-- HOME / PEN -->
+  <section class="screen" id="home">
+    <div class="topbar">
+      <div class="brand"><h1>Turtle Squares<span class="two">2</span></h1></div>
+      <div class="row">
+        <span class="pill coins">🪙 0</span>
+        <span class="pill tcount">🐢 1 / 31</span>
+        <button class="iconbtn" id="muteBtn" aria-label="Sound on or off">🔊</button>
+      </div>
+    </div>
+
+    <div class="scene" id="scene">
+      <svg class="scene-bg" viewBox="0 0 1000 625" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="1000" height="625" style="fill:var(--sky)"/>
+        <path d="M0,62 C200,48 400,78 600,62 S880,48 1000,62 L1000,240 L0,240Z" style="fill:var(--sea)"/>
+        <path d="M0,118 C220,106 420,132 640,116 S900,106 1000,118 L1000,240 L0,240Z" style="fill:var(--sea-deep);opacity:.35"/>
+        <path d="M60,90 q20,-10 40,0 M300,82 q20,-10 40,0 M620,98 q20,-10 40,0 M820,80 q20,-10 40,0 M470,150 q20,-10 40,0 M150,160 q20,-10 40,0 M760,165 q20,-10 40,0" style="stroke:var(--foam);opacity:.6" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M0,196 C160,214 330,184 520,200 S860,216 1000,192 L1000,240 L0,240Z" style="fill:var(--foam);opacity:.75"/>
+        <path d="M0,208 C160,226 320,196 520,214 S860,230 1000,204 L1000,625 L0,625Z" style="fill:var(--sand)"/>
+        <g id="fence"></g>
+        <g style="fill:var(--sand-deep)">
+          <circle cx="120" cy="470" r="5"/><circle cx="260" cy="560" r="4"/><circle cx="420" cy="430" r="4"/><circle cx="560" cy="520" r="6"/><circle cx="720" cy="450" r="4"/><circle cx="860" cy="560" r="5"/><circle cx="930" cy="400" r="4"/><circle cx="340" cy="600" r="5"/><circle cx="640" cy="360" r="4"/><circle cx="200" cy="340" r="4"/>
+        </g>
+        <g style="fill:var(--grass)">
+          <path d="M40,600 l6,-26 4,22 5,-30 4,32 5,-22 4,26Z"/><path d="M950,610 l6,-24 4,20 5,-28 4,30 5,-20 4,24Z"/><path d="M480,612 l5,-18 3,15 4,-20 3,22 4,-16 3,18Z"/>
+        </g>
+        <ellipse cx="880" cy="300" rx="70" ry="18" style="fill:var(--sea);opacity:.55"/>
+        <ellipse cx="880" cy="298" rx="52" ry="11" style="fill:var(--foam);opacity:.35"/>
+      </svg>
+      <div class="sun" aria-hidden="true"></div>
+      <svg class="sign" viewBox="0 0 180 120" aria-hidden="true">
+        <rect x="84" y="50" width="12" height="70" fill="#8B5E34"/>
+        <rect x="6" y="8" width="168" height="54" rx="12" fill="#C98B4E" stroke="#8B5E34" stroke-width="4"/>
+        <text x="90" y="31" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="19" fill="#fff">Pebble Lagoon</text>
+        <text x="90" y="52" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="700" font-size="15" fill="#FFE9C7">Turtle Pen</text>
+      </svg>
+      <div class="stage" id="stage"></div>
+      <div class="alert" id="alert" hidden></div>
+    </div>
+    <p class="penhelp">Tap a turtle to dress them up or give a treat. Press and hold to pick one up. Drag toys and furniture to move them.</p>
+
+    <div class="actions">
+      <button class="bigbtn b-rescue" data-go="missions"><span class="ico">🛟</span><b>Rescue missions</b><small id="missionHint">Free turtles with square numbers</small></button>
+      <button class="bigbtn b-shop" data-go="shop"><span class="ico">🛍️</span><b>Shell Shop</b><small id="shopHint">Outfits, toys and furniture</small></button>
+      <button class="bigbtn b-book" data-go="book"><span class="ico">📖</span><b>Turtle Book</b><small id="bookHint">Everyone out there</small></button>
+      <button class="bigbtn b-academy" data-go="academy"><span class="ico">🎓</span><b>Academy</b><small id="academyHint">Tricks for squares</small></button>
+    </div>
+  </section>
+
+  <!-- MISSIONS -->
+  <section class="screen" id="missions" hidden>
+    <div class="head"><button class="iconbtn" data-go="home" aria-label="Back to the pen">🏝️</button><h2>Rescue missions</h2><span class="pill coins">🪙 0</span></div>
+    <p class="sub">Every mission has three turtles to rescue, one for each star. Get all three stars on every mission to bring everyone home. One star opens the next mission.</p>
+    <div class="depth-note"><span>🏖️ Shallow</span><span>Deep 🌊</span></div>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- MISSION INTRO -->
+  <section class="screen" id="intro" hidden>
+    <div class="head"><button class="iconbtn" data-go="missions" aria-label="Back to missions">↩</button><h2 id="introTitle">Mission</h2></div>
+    <div class="panel">
+      <p style="margin:0" id="introDesc"></p>
+      <div class="tipbox" id="introTip"></div>
+      <div class="intro-grid" id="introPrizes"></div>
+      <ul class="rules" id="introRules"></ul>
+      <div class="row end" style="margin-top:16px">
+        <button class="btn alt" data-go="academy">Visit the Academy first</button>
+        <button class="btn" id="startBtn">Start rescue</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="game" hidden>
+    <div class="gamebar">
+      <button class="iconbtn" id="quitBtn" aria-label="Stop mission">✕</button>
+      <span class="pill" id="qCount">1 / 10</span>
+      <span class="pill" id="scoreP">0 pts</span>
+    </div>
+    <div class="meter" id="meter"><div class="fill" id="meterFill"></div></div>
+    <div class="bonus" id="bonus"><i id="bonusFill"></i><span id="bonusLbl">⚡ Speed bonus +5</span></div>
+    <div class="under" id="under">
+      <div class="rays"></div>
+      <svg class="weed" style="left:10px" viewBox="0 0 70 120" aria-hidden="true"><path d="M20,120 C0,90 40,70 20,40 C8,20 30,10 24,0" stroke="#2E8B57" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M48,120 C60,95 36,80 50,55" stroke="#3FA768" stroke-width="7" fill="none" stroke-linecap="round"/></svg>
+      <svg class="weed" style="right:10px" viewBox="0 0 70 120" aria-hidden="true"><path d="M30,120 C50,90 14,70 34,38 C44,22 30,12 36,0" stroke="#2E8B57" stroke-width="8" fill="none" stroke-linecap="round"/></svg>
+      <span class="tag" id="trapTag">Turtle in trouble!</span>
+      <span class="combo" id="combo">🔥 3 in a row</span>
+      <div class="trapped" id="trapped"></div>
+    </div>
+    <div class="qcard">
+      <div class="qtext" id="qText"></div>
+      <div id="qClue"></div>
+      <div class="qhelp" id="qHelp"></div>
+      <div id="answerZone"></div>
+      <div id="fb"></div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="screen" id="results" hidden>
+    <div class="panel" id="resultsBody"></div>
+  </section>
+
+  <!-- SHOP -->
+  <section class="screen" id="shop" hidden>
+    <div class="head"><button class="iconbtn" data-go="home" aria-label="Back to the pen">🏝️</button><h2>Shell Shop</h2><span class="pill coins">🪙 0</span></div>
+    <div class="tabs" id="shopTabs" role="tablist"></div>
+    <div id="shopBody"></div>
+  </section>
+
+  <!-- BOOK -->
+  <section class="screen" id="book" hidden>
+    <div class="head"><button class="iconbtn" data-go="home" aria-label="Back to the pen">🏝️</button><h2>Turtle Book</h2></div>
+    <p class="sub" id="bookSub"></p>
+    <div class="book" id="bookGrid"></div>
+  </section>
+
+  <!-- ACADEMY -->
+  <section class="screen" id="academy" hidden>
+    <div class="head"><button class="iconbtn" data-go="home" aria-label="Back to the pen">🏝️</button><h2>Turtle Academy</h2><span class="pill coins">🪙 0</span></div>
+    <p class="sub" id="academySub"></p>
+    <div class="lessons" id="lessonList"></div>
+    <div class="panel" style="margin-top:18px">
+      <h3 style="font-size:26px">Flip-card practice</h3>
+      <p style="margin:4px 0 0;color:var(--muted)">Say the answer out loud, then tap to check. <button class="btn alt" id="hideAll" style="font-size:15px;padding:6px 12px;margin-left:6px">Hide all</button></p>
+      <div class="flipgrid" id="flipGrid"></div>
+    </div>
+  </section>
+
+  <!-- LESSON -->
+  <section class="screen" id="lesson" hidden>
+    <div class="head"><button class="iconbtn" data-go="academy" aria-label="Back to academy">↩</button><h2 id="lessonTitle"></h2></div>
+    <div class="panel">
+      <div class="lesson-body" id="lessonBody"></div>
+      <div class="tipbox" style="border-left-color:var(--coral)">
+        <b>Check it</b>
+        <p style="margin:4px 0 0" id="checkQ"></p>
+        <div class="answers" id="checkOpts"></div>
+        <p id="checkFb" style="margin:10px 0 0;font-weight:800"></p>
+      </div>
+      <div class="row end" style="margin-top:12px">
+        <button class="btn alt" data-go="academy">All lessons</button>
+        <button class="btn" id="nextLesson">Next lesson</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden><div class="panel" id="modalBody" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+<div class="party" id="party"></div>
+
+<script>
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const rint=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const R=(a,b)=>{const o=[];for(let i=a;i<=b;i++)o.push(i);return o};
+const isSquare=v=>Number.isInteger(Math.sqrt(v));
+const fill=(s,o)=>s.replace(/\{(\w+)\}/g,(m,k)=>o[k]!=null?o[k]:m);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let uid=0;
+
+/* ================= DATA: SPECIES & PERSONALITIES ================= */
+const SPECIES={
+  green:{label:'Green turtle',shell:'#6DAE4F',pat:'#3F7D32',skin:'#A9D78C',rim:'#E7E2A8',pattern:'hex'},
+  hawksbill:{label:'Hawksbill turtle',shell:'#C98A3F',pat:'#6E401A',skin:'#EAC68C',rim:'#F4E1B0',pattern:'hex'},
+  loggerhead:{label:'Loggerhead turtle',shell:'#CB6C3E',pat:'#8E4222',skin:'#F2BD8E',rim:'#F6DDB6',pattern:'hex'},
+  leatherback:{label:'Leatherback turtle',shell:'#4D5E70',pat:'#D9E4EE',skin:'#76879A',rim:'#C9D3DD',pattern:'ridges'},
+  flatback:{label:'Flatback turtle',shell:'#9DBA9E',pat:'#6F8F72',skin:'#D6E7C6',rim:'#EEF1D8',pattern:'hex'},
+  olive:{label:'Olive ridley turtle',shell:'#8F9C45',pat:'#5D6827',skin:'#CAD28A',rim:'#E9E8B8',pattern:'spots'},
+  kemps:{label:"Kemp’s ridley turtle",shell:'#7F9088',pat:'#56665E',skin:'#BCCAC1',rim:'#E0E6DE',pattern:'spots'}
+};
+const PERS={
+  kind:{label:'Kind',icon:'😇',nice:2,tip:'Kind turtles are nice to everyone and try to stop fights.'},
+  playful:{label:'Playful',icon:'🤸',nice:1,tip:'Playful turtles love toys and games of tag.'},
+  shy:{label:'Shy',icon:'🙈',nice:1,tip:'Shy turtles hide in their shells when someone is mean to them.'},
+  royal:{label:'Royal',icon:'👑',nice:1,tip:'Royal turtles expect everyone to bow. They are lovely underneath.'},
+  sleepy:{label:'Sleepy',icon:'😴',nice:0,tip:'Sleepy turtles nap a lot. Beds, couches and deck chairs make them very happy.'},
+  cheeky:{label:'Cheeky',icon:'😜',nice:0,tip:'Cheeky turtles play pranks. Some turtles laugh. Others get cross.'},
+  showoff:{label:'Show-off',icon:'🌟',nice:0,tip:'Show-offs love to brag, especially in a fancy outfit.'},
+  bossy:{label:'Bossy',icon:'📣',nice:-1,tip:'Bossy turtles order everyone around, which can start arguments.'},
+  grumpy:{label:'Grumpy',icon:'😤',nice:-1,tip:'Grumpy turtles complain and sometimes fight. Treats cheer them up.'},
+  mean:{label:'Mean',icon:'😈',nice:-2,tip:'Mean turtles tease and start fights. A really happy mean turtle behaves much better, so try treats and outfits.'}
+};
+
+/* ================= DATA: TURTLES ================= */
+const TURTLES=[
+ {id:'pebble',name:'Pebble',species:'green',p:'kind',speed:1,lv:0,star:0,bio:'The very first resident of Pebble Lagoon. Greets every new turtle with a hug and a seagrass snack.',fav:1,quote:'1 × 1 = 1. Every big adventure starts with one!'},
+ {id:'bubbles',name:'Bubbles',species:'green',shell:'#5CC7B0',p:'playful',speed:1.5,lv:1,star:1,bio:'Blows bubbles when she laughs, which is always.',fav:4,quote:'2 × 2 = 4. Two bubbles, then two more bubbles!'},
+ {id:'grumbleweed',name:'Grumbleweed',species:'loggerhead',p:'grumpy',speed:.6,lv:1,star:2,bio:'Has complained about the weather every day for 80 years. Secretly loves sunsets.',fav:9,quote:'3 × 3 = 9. Hmph. Nine. Happy now?'},
+ {id:'clementine',name:'Clementine',species:'hawksbill',shell:'#F29A38',p:'kind',speed:1,lv:1,star:3,bio:'Orange as a sunrise. Knits tiny scarves for everyone, even the crabs.',fav:25,quote:'5 × 5 = 25. Squares of numbers ending in 5 always end in 25!'},
+ {id:'snapper',name:'Snapper',species:'kemps',p:'mean',speed:1.3,lv:2,star:1,bio:'Snaps at everyone and calls it a joke. Nobody laughs. Might be nicer if somebody gave him a treat.',fav:64,quote:'8 × 8 = 64. That’s 64 reasons I’m the best.'},
+ {id:'dottie',name:'Dottie',species:'olive',p:'shy',speed:.9,lv:2,star:2,bio:'Covered in freckly spots. Hides in her shell when things get loud.',fav:16,quote:'...4 × 4 = 16. *hides*'},
+ {id:'wobblesworth',name:'Sir Wobblesworth',species:'leatherback',p:'showoff',speed:.7,lv:2,star:3,bio:'Claims he once won a medal for Most Magnificent Wobble. There is no such medal.',fav:100,quote:'10 × 10 = 100. One hundred percent magnificent.'},
+ {id:'pickle',name:'Pickle',species:'green',shell:'#7FB23A',p:'cheeky',speed:1.4,lv:3,star:1,bio:'Green, bumpy and full of pranks. Once hid in a salad for a whole day.',fav:36,quote:'6 × 6 = 36. Six pranks a day, six days a week!'},
+ {id:'marshmallow',name:'Marshmallow',species:'flatback',shell:'#F3C6D3',p:'sleepy',speed:.4,lv:3,star:2,bio:'Soft, pink and snoozy. Has been known to fall asleep mid-sentence.',fav:81,quote:'9 × 9 is... zzz... 81...'},
+ {id:'biggus',name:'Big Gus',species:'loggerhead',shell:'#A4552C',p:'bossy',speed:.7,lv:3,star:3,bio:'The biggest shell in the lagoon and the loudest voice. Makes a rule for everything.',fav:144,quote:'12 × 12 = 144. That’s a rule!'},
+ {id:'twinkle',name:'Twinkle',species:'kemps',shell:'#E88BC4',p:'kind',speed:1.1,lv:4,star:1,bio:'Pink shell with a sparkle. Writes thank-you notes to the moon.',fav:49,quote:'Seven sevens, forty-nine, you’re a friend of mine!'},
+ {id:'crunch',name:'Crunch',species:'hawksbill',p:'mean',speed:1.2,lv:4,star:2,bio:'Crunches shells, crunches snacks, crunches everyone’s feelings. Loves a good treat, though.',fav:121,quote:'11 × 11 = 121. Same backwards. Like my frown.'},
+ {id:'nibbles',name:'Nibbles',species:'olive',p:'playful',speed:1.6,lv:4,star:3,bio:'Nibbles everything to check if it’s a snack. Usually it isn’t.',fav:16,quote:'4 × 4 = 16 nibbles!'},
+ {id:'mumbles',name:'Mumbles',species:'flatback',p:'shy',speed:.8,lv:5,star:1,bio:'Speaks so quietly that only the fish can hear. Very good at maths.',fav:169,quote:'*mumbles* ...13 squared is 169...'},
+ {id:'rumble',name:'Rumble',species:'leatherback',p:'grumpy',speed:.6,lv:5,star:2,bio:'His tummy rumbles, his voice rumbles, and so does his temper.',fav:196,quote:'14² = 196. Now leave me alone.'},
+ {id:'pearlbottom',name:'Lady Pearlbottom',species:'kemps',shell:'#E8E4DA',p:'showoff',speed:.8,lv:5,star:3,bio:'Pearl-white shell, polished twice a day. Expects applause when she arrives.',fav:225,quote:'15² = 225. One times two is two, then twenty-five. Flawless.'},
+ {id:'scuttle',name:'Scuttle',species:'olive',p:'cheeky',speed:1.7,lv:6,star:1,bio:'Walks sideways like a crab to confuse everyone. It works.',fav:9,quote:'3 × 3 = 9. Or is it? Ha, yes it is.'},
+ {id:'honeydew',name:'Honeydew',species:'green',shell:'#A8D672',p:'kind',speed:.9,lv:6,star:2,bio:'Sweet as melon. Always shares her snacks, even the last one.',fav:36,quote:'6 × 6 = 36. Plenty for everyone!'},
+ {id:'tank',name:'Tank',species:'loggerhead',shell:'#7C7F55',p:'bossy',speed:.6,lv:6,star:3,bio:'Built like a boulder. Thinks he’s the pen’s security guard.',fav:100,quote:'10² = 100. One hundred push-ups. Now!'},
+ {id:'poppy',name:'Poppy',species:'hawksbill',shell:'#E4574B',p:'playful',speed:1.5,lv:7,star:1,bio:'Bright red and bouncy. Has invented 47 games, all called Poppy Tag.',fav:64,quote:'8 × 8 = 64, and 8 × 9 is just one more 8: 72!'},
+ {id:'chomp',name:'Chomp',species:'kemps',p:'grumpy',speed:.8,lv:7,star:2,bio:'Chomps loudly and hates being told to chomp quietly.',fav:81,quote:'9 × 9 = 81. So 8 × 9 is 81 − 9 = 72. Obviously.'},
+ {id:'sleepysal',name:'Sleepy Sal',species:'leatherback',shell:'#7E8FC8',p:'sleepy',speed:.35,lv:7,star:3,bio:'Can sleep anywhere: on a rock, in a hat, once on top of Big Gus.',fav:49,quote:'7 × 7 = 49... so 6 × 8 = 48... zzz'},
+ {id:'button',name:'Button',species:'flatback',shell:'#C9B08A',p:'shy',speed:.9,lv:8,star:1,bio:'Small and round as a button. Collects lost things and gives them back.',fav:4,quote:'2 × 2 = 4... um, is that right?'},
+ {id:'spike',name:'Spike',species:'hawksbill',shell:'#5B4A6E',p:'mean',speed:1.3,lv:8,star:2,bio:'Pointy attitude, spiky words. Deep down, he just wants a friend.',fav:144,quote:'12 × 12 = 144. And 11 × 13 is 143. Bet you didn’t know that.'},
+ {id:'seaweed',name:'Madame Seaweed',species:'green',shell:'#3F8E6A',p:'bossy',speed:.7,lv:8,star:3,bio:'Tells fortunes with a crystal ball. Her fortunes are mostly orders.',fav:169,quote:'I foresee... 13 × 13 = 169. Now fetch my shawl.'},
+ {id:'jellybean',name:'Jellybean',species:'olive',shell:'#9B6CE0',p:'playful',speed:1.6,lv:9,star:1,bio:'Purple and very, very bouncy. Has never walked when she could hop.',fav:25,quote:'5 × 5 = 25, so 4 × 6 is 24! Boing!'},
+ {id:'zappo',name:'Zappo',species:'kemps',shell:'#3AA6E8',p:'cheeky',speed:1.8,lv:9,star:2,bio:'Electric blue and fast as a spark. Loves sneaking up on sleepers.',fav:121,quote:'11 × 11 = 121. ZAP! Did I scare you?'},
+ {id:'custard',name:'Custard',species:'flatback',shell:'#F2D46B',p:'kind',speed:.8,lv:9,star:3,bio:'Warm, yellow and comforting. Everyone feels better after a chat with Custard.',fav:196,quote:'7² is 49, and 14² is four lots of that: 196!'},
+ {id:'doodle',name:'Doodle',species:'green',shell:'#5FB6D9',p:'playful',speed:1.3,lv:10,star:1,bio:'Draws pictures in the sand. The waves wash them away. Doodle draws more.',fav:36,quote:'6 × 6 = 36, and 6 × 12 is double that: 72!'},
+ {id:'thunderflip',name:'Thunderflip',species:'leatherback',shell:'#2E3F66',p:'showoff',speed:1.1,lv:10,star:2,bio:'Swam through the Storm Surge on purpose. Tells everyone about it. Constantly.',fav:225,quote:'15 × 15 = 225. Faster than lightning!'},
+ {id:'coralie',name:'Queen Coralie',species:'hawksbill',shell:'#F2B822',p:'royal',speed:.7,lv:10,star:3,gold:true,bio:'The golden queen of the deep. Only appears for rescuers who earn three stars in the storm.',fav:225,quote:'Fifteen squared is 225. The biggest square for the grandest queen.'}
+];
+const BYID=Object.fromEntries(TURTLES.map(t=>[t.id,t]));
+const MODEL={id:'__model',species:'green'};
+
+/* ================= DATA: LEVELS ================= */
+const LEVELS=[
+ {id:1,name:'Hatchling Beach',color:'#7FE0D2',ink:'#13344A',desc:'Squares of 1 to 5, and 10. Pick the right answer.',nums:[1,2,3,4,5,10],types:{sq:1},mode:'mc',bonus:10,q:10,
+   tip:'A square number is a number times itself. 3² means 3 × 3, which is 9.'},
+ {id:2,name:'Rock Pools',color:'#4FCBCB',ink:'#13344A',desc:'All the squares from 1 to 10. Pick the right answer.',nums:R(1,10),types:{sq:1},mode:'mc',bonus:9,q:10,
+   tip:'Rhymes stick! “Seven sevens, forty-nine, the turtle’s feeling fine.”'},
+ {id:3,name:'Seagrass Shallows',color:'#2DB2C7',ink:'#fff',desc:'Squares of 2 to 10. Now you type the answer.',nums:R(2,10),types:{sq:1},mode:'type',bonus:9,q:10,
+   tip:'Use the number pad or your keyboard. Press Enter (or ✓) to send your answer.'},
+ {id:4,name:'Coral Garden',color:'#2593BF',ink:'#fff',desc:'The big ones: 11² to 15², with a few old friends.',nums:[11,12,13,14,15,11,12,13,14,15,6,7,8,9],types:{sq:1},mode:'mixed',bonus:10,q:12,
+   tip:'Ten trick: 12² = 100 + (20 × 2) + 2² = 100 + 40 + 4 = 144.'},
+ {id:5,name:'Kelp Forest',color:'#2078B1',ink:'#fff',desc:'Every square from 1² to 15². Type them all.',nums:R(1,15),types:{sq:1},mode:'type',bonus:8,q:12,
+   tip:'Twins: 13² = 169 and 14² = 196. Same digits, last two swapped.'},
+ {id:6,name:'Reverse Reef',color:'#1E6AA8',ink:'#fff',desc:'Backwards! Find the number that was squared, and spot fake squares.',nums:R(2,15),types:{root:.7,isSq:.3},mode:'type',bonus:9,q:12,
+   tip:'See 169? Ask: what times itself makes 169? It’s 13. Real squares never end in 2, 3, 7 or 8.'},
+ {id:7,name:'Stepping Stones',color:'#3F5FB0',ink:'#fff',desc:'Squares help you multiply! Use a square you know to work out its neighbour.',nums:R(3,12),mnums:R(3,12),types:{sq:.35,near:.65},mode:'mixed',bonus:10,q:12,
+   tip:'9 × 9 = 81. So 8 × 9 is one fewer 9: 81 − 9 = 72. And 9 × 10 is one more 9: 81 + 9 = 90.'},
+ {id:8,name:'The Deep Blue',color:'#1C488A',ink:'#fff',desc:'Squares, roots, neighbour squares and times tables, all mixed up.',nums:R(2,15),mnums:R(3,12),types:{sq:.25,root:.15,diff:.15,near:.3,times:.15},mode:'type',bonus:9,q:14,
+   tip:'Neighbour squares: 13² − 12² is just 13 + 12 = 25.'},
+ {id:9,name:'Sunken Ship',color:'#34307A',ink:'#fff',desc:'Multiplication treasure: sandwich numbers, doubles and missing numbers.',nums:R(2,15),mnums:R(3,12),snums:R(3,15),types:{near:.25,sandwich:.2,dbl:.15,times:.25,missing:.15},mode:'type',bonus:10,q:14,
+   tip:'Sandwich trick: 11 × 13 sits either side of 12, so it’s 12² − 1 = 143.'},
+ {id:10,name:'Storm Surge',color:'#1B2F6E',ink:'#fff',desc:'The big storm. Everything you’ve learned, all at once.',nums:R(2,15),mnums:R(3,14),snums:R(3,15),types:{sq:.2,root:.12,isSq:.06,diff:.08,near:.18,sandwich:.1,dbl:.08,times:.12,missing:.06},mode:'type',bonus:8,q:15,
+   tip:'No rush. Every right answer counts, and quick ones earn a bonus.'}
+];
+const STAR=[.45,.65,.85];
+const prizesOf=L=>[1,2,3].map(s=>TURTLES.find(t=>t.lv===L.id&&t.star===s));
+
+const TIPS={
+ 1:'1 × 1 = 1. One is its own square!',
+ 2:'2 × 2 = 4. Two pairs of flippers.',
+ 3:'3 × 3 = 9. Picture a noughts-and-crosses grid: 3 rows of 3 is 9 squares.',
+ 4:'4 × 4 = 16. Doubling trick: 4² = 4 × 2² = 4 × 4 = 16.',
+ 5:'5 × 5 = 25. Every square of a number ending in 5 ends in 25.',
+ 6:'“Six by six is thirty-six, the turtle does some fancy tricks!” 6 × 6 = 36.',
+ 7:'“Seven sevens, forty-nine, the turtle’s feeling fine!” 7 × 7 = 49.',
+ 8:'“Eight times eight is sixty-four, the turtle’s snoring on the shore!” 8 × 8 = 64.',
+ 9:'9 × 9 = 81. Ten nines is 90, take away one nine: 90 − 9 = 81.',
+ 10:'10 × 10 = 100. Put two zeros after the 1.',
+ 11:'11 × 11 = 121. It reads the same forwards and backwards!',
+ 12:'12 × 12 = 144. A dozen dozens, also called a gross.',
+ 13:'13 × 13 = 169. Ten trick: 100 + 60 + 9. Its twin, 14², swaps the last two digits: 196.',
+ 14:'14 × 14 = 196. Doubling trick: 4 × 7² = 4 × 49 = 196. Twin of 169!',
+ 15:'15 × 15 = 225. Five trick: 1 × 2 = 2, then put 25 on the end: 225.'
+};
+
+/* ================= DATA: SHOP ITEMS ================= */
+const SLOTS=[{id:'head',label:'Hats'},{id:'face',label:'Glasses & faces'},{id:'neck',label:'Neckwear'},{id:'back',label:'On the back'},{id:'shell',label:'Shell paint'}];
+const ITEMS=[
+ {id:'partyhat',cat:'head',name:'Party hat',price:20,d:'Every day is a party.'},
+ {id:'flowercrown',cat:'head',name:'Flower crown',price:25,d:'Fresh from the dune garden.'},
+ {id:'chef',cat:'head',name:'Chef hat',price:30,d:'For turtles who cook up trouble.'},
+ {id:'bunnyears',cat:'head',name:'Bunny ears',price:30,d:'Hop hop.'},
+ {id:'pirate',cat:'head',name:'Pirate hat',price:35,d:'Arr! Treasure hunting optional.'},
+ {id:'cowboy',cat:'head',name:'Cowboy hat',price:35,d:'Yee-haw, partner.'},
+ {id:'propeller',cat:'head',name:'Propeller cap',price:40,d:'It really spins!'},
+ {id:'viking',cat:'head',name:'Viking helmet',price:45,d:'Horns included. Bravery too.'},
+ {id:'wizard',cat:'head',name:'Wizard hat',price:50,d:'Casts spells, mostly on seaweed.'},
+ {id:'crown',cat:'head',name:'Golden crown',price:80,d:'Fit for a turtle monarch.'},
+ {id:'moustache',cat:'face',name:'Fancy moustache',price:20,d:'Twirl it thoughtfully.'},
+ {id:'shades',cat:'face',name:'Cool shades',price:25,d:'Too cool for school.'},
+ {id:'heartglasses',cat:'face',name:'Heart glasses',price:30,d:'Everything looks lovely.'},
+ {id:'starglasses',cat:'face',name:'Star glasses',price:30,d:'For superstars only.'},
+ {id:'monocle',cat:'face',name:'Monocle',price:35,d:'Terribly distinguished.'},
+ {id:'bowtie',cat:'neck',name:'Bow tie',price:15,d:'Dapper!'},
+ {id:'bandana',cat:'neck',name:'Bandana',price:15,d:'Ready for adventure.'},
+ {id:'scarf',cat:'neck',name:'Stripy scarf',price:20,d:'Cosy on windy days.'},
+ {id:'lei',cat:'neck',name:'Flower lei',price:25,d:'Aloha!'},
+ {id:'pearls',cat:'neck',name:'Pearl necklace',price:40,d:'Real sea pearls. Probably.'},
+ {id:'balloon',cat:'back',name:'Red balloon',price:35,d:'Tied to the shell so it can’t float away.'},
+ {id:'cape',cat:'back',name:'Super cape',price:45,d:'Faster than a speeding wave.'},
+ {id:'wings',cat:'back',name:'Fairy wings',price:60,d:'They flutter!'},
+ {id:'jetpack',cat:'back',name:'Jetpack',price:90,d:'Doesn’t really fly. Makes a great whoosh.'},
+ {id:'polka',cat:'shell',name:'Polka dots',price:30,d:'Spotty and dotty.'},
+ {id:'zigzag',cat:'shell',name:'Lightning stripe',price:35,d:'Zoom zoom.'},
+ {id:'hearts',cat:'shell',name:'Heart stickers',price:35,d:'Lots of love.'},
+ {id:'stars',cat:'shell',name:'Starry shell',price:40,d:'Twinkle twinkle.'},
+ {id:'rainbow',cat:'shell',name:'Rainbow shell',price:60,d:'Every colour at once.'},
+ {id:'tennis',cat:'toy',name:'Tennis ball',price:15,emoji:'🎾',d:'Fuzzy and bouncy.'},
+ {id:'duck',cat:'toy',name:'Rubber duck',price:20,emoji:'🦆',d:'Squeak!'},
+ {id:'yoyo',cat:'toy',name:'Yo-yo',price:25,emoji:'🪀',d:'Up, down, up, down.'},
+ {id:'ball',cat:'toy',name:'Volleyball',price:25,emoji:'🏐',d:'Great for beach games.'},
+ {id:'frisbee',cat:'toy',name:'Frisbee',price:30,emoji:'🥏',d:'Flippers make great throwers.'},
+ {id:'teddy',cat:'toy',name:'Teddy bear',price:35,emoji:'🧸',d:'For cuddles.'},
+ {id:'drum',cat:'toy',name:'Drum',price:40,emoji:'🥁',d:'Very loud. Grumpy turtles hate it.'},
+ {id:'kite',cat:'toy',name:'Kite',price:45,emoji:'🪁',d:'Needs a good sea breeze.'},
+ {id:'trumpet',cat:'toy',name:'Trumpet',price:45,emoji:'🎺',d:'Toot toot!'},
+ {id:'boat',cat:'toy',name:'Toy boat',price:50,emoji:'⛵',d:'Sails in puddles.'},
+ {id:'skateboard',cat:'toy',name:'Skateboard',price:60,emoji:'🛹',d:'Rad flipper tricks.'},
+ {id:'pinata',cat:'toy',name:'Piñata',price:70,emoji:'🪅',d:'Full of seagrass sweets.'},
+ {id:'crystal',cat:'toy',name:'Crystal ball',price:80,emoji:'🔮',d:'Shows the future. Mostly naps.'},
+ {id:'robot',cat:'toy',name:'Toy robot',price:90,emoji:'🤖',d:'Beep boop, 12 × 12 = 144.'},
+ {id:'sunflower',cat:'furn',name:'Sunflower',price:20,emoji:'🌻',d:'Always facing the sun.'},
+ {id:'cactus',cat:'furn',name:'Cactus',price:25,emoji:'🌵',d:'Do not hug.'},
+ {id:'shellpile',cat:'furn',name:'Shell pile',price:25,emoji:'🐚',d:'A very fancy collection.'},
+ {id:'lantern',cat:'furn',name:'Lantern',price:30,emoji:'🏮',d:'Glows at night.'},
+ {id:'chair',cat:'furn',name:'Deck chair',price:35,emoji:'🪑',rest:true,d:'Turtles will sit and relax here.'},
+ {id:'umbrella',cat:'furn',name:'Beach umbrella',price:40,emoji:'⛱️',rest:true,d:'A shady spot for a snooze.'},
+ {id:'mushroom',cat:'furn',name:'Giant mushroom',price:45,emoji:'🍄',d:'Where did that come from?'},
+ {id:'palm',cat:'furn',name:'Palm tree',price:50,emoji:'🌴',d:'Instant holiday.'},
+ {id:'sandcastle',cat:'furn',name:'Sandcastle',price:80,emoji:'🏰',d:'Big Gus wants to live in it.'},
+ {id:'couch',cat:'furn',name:'Comfy couch',price:90,emoji:'🛋️',rest:true,d:'The comfiest spot in the pen.'},
+ {id:'bath',cat:'furn',name:'Bubble bath',price:95,emoji:'🛁',rest:true,d:'Bubbles and relaxing.'},
+ {id:'bed',cat:'furn',name:'Cosy bed',price:110,emoji:'🛏️',rest:true,d:'Sleepy turtles adore it.'},
+ {id:'moai',cat:'furn',name:'Stone head',price:120,emoji:'🗿',d:'It watches. Silently.'},
+ {id:'fountain',cat:'furn',name:'Fountain',price:150,emoji:'⛲',d:'Splish splash.'},
+ {id:'tent',cat:'furn',name:'Circus tent',price:180,emoji:'🎪',d:'The greatest show on the sand.'},
+ {id:'rainbowarch',cat:'furn',name:'Rainbow',price:200,emoji:'🌈',d:'Your very own rainbow.'},
+ {id:'ferris',cat:'furn',name:'Ferris wheel',price:250,emoji:'🎡',d:'The view from the top is amazing.'},
+ {id:'rocket',cat:'furn',name:'Rocket ship',price:300,emoji:'🚀',d:'Turtles in space!'},
+ {id:'cookie',cat:'treat',name:'Seagrass cookie',price:5,emoji:'🍪',d:'Crunchy and green.'},
+ {id:'strawberry',cat:'treat',name:'Strawberry',price:6,emoji:'🍓',d:'Sweet and juicy.'},
+ {id:'jelly',cat:'treat',name:'Jellyfish jelly',price:8,emoji:'🍮',d:'Wobbly. A turtle favourite.'},
+ {id:'watermelon',cat:'treat',name:'Watermelon',price:10,emoji:'🍉',d:'Big, cold and drippy.'},
+ {id:'cupcake',cat:'treat',name:'Cupcake',price:12,emoji:'🧁',d:'With seaweed sprinkles.'},
+ {id:'icecream',cat:'treat',name:'Ice cream',price:15,emoji:'🍦',d:'The ultimate treat.'}
+];
+const ITEM=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+const isOutfit=i=>SLOTS.some(s=>s.id===i.cat);
+
+/* ================= DATA: WHAT TURTLES SAY ================= */
+const SOLO={
+ kind:['What a lovely day for everyone!','Has anyone had a hug today?','I love it here. Thank you for rescuing me!','Did you know 5 × 5 = 25? I love sharing facts!'],
+ playful:['Who wants to play?!','Race you to the fence!','Wheee! Look at me go!','Square tag! 1, 4, 9, 16... you’re it!'],
+ shy:['...','*peeks out* ...hi.','I like it over here. It’s quiet.','Um... 3 × 3 = 9. I think.'],
+ royal:['One is simply delighted.','A queen needs a bigger pen. Just saying.','15 × 15 = 225. Queens know their squares.','Everyone may admire me now.'],
+ sleepy:['Yawwwn...','Is it nap time? It’s always nap time.','Zzz... 8 × 8 = 64... zzz','Five more minutes...'],
+ cheeky:['Hee hee. I just hid a crab in someone’s bed.','Pull my flipper!','What’s 12 × 12? A GROSS joke! Ha!','I’m not up to anything. Promise.'],
+ showoff:['Did everyone see how shiny my shell is?','I can do 11 × 11 in my sleep. It’s 121!','Photos later, darlings.','I am the most fabulous turtle here. Obviously.'],
+ bossy:['Everyone line up! Tallest to shortest!','Who left this seaweed here?!','I’m in charge today. And tomorrow.','Rule number one: listen to me.'],
+ grumpy:['Too sunny.','Too much sand. Why is there so much sand?','Ugh. Everyone is so LOUD.','Hmph.'],
+ mean:['What are YOU looking at?','This whole pen is MINE.','Heh heh. Time to cause trouble.','Nobody is as cool as me.']
+};
+const HELD={
+ kind:['Oh! Hello up there!','Thank you for the lift!'],playful:['Wheee! Higher!','I’m flying!'],shy:['Eek! Gently, please!','*hides head*'],
+ royal:['Carry me with care!','Onward, to the royal cushion!'],sleepy:['Zzz... huh? Where are we going?','Carry me to bed, please...'],
+ cheeky:['Wheee! Do a loop!','That tickles!'],showoff:['Careful! This shell is precious!','Take me to my fans!'],
+ bossy:['Put me down this INSTANT!','I didn’t say you could do that!'],grumpy:['Put me DOWN.','Ugh. Rude.'],mean:['Hey! Let go of me!','You’ll be sorry!']
+};
+const DROPL={kind:'Thank you!',playful:'Again! Again!',shy:'...thanks.',royal:'You may go now.',sleepy:'Zzz...',cheeky:'Whee! That was fun!',showoff:'Did everyone see that?',bossy:'Finally!',grumpy:'Hmph.',mean:'Don’t do that again.'};
+const TOYL={
+ kind:['Anyone want a turn with the {toy}?','This {toy} is lovely!'],playful:['{toy} time! Best day ever!','Wheee, the {toy}!'],shy:['*quietly plays with the {toy}*','The {toy} is my friend.'],
+ royal:['The royal {toy}. Splendid.'],sleepy:['I’ll play with the {toy}... after a nap...'],cheeky:['Watch me do a trick with the {toy}!'],
+ showoff:['Nobody plays with a {toy} as well as me!'],bossy:['This {toy} is MINE until I say so.'],grumpy:['I’m not having fun. ...Okay, a LITTLE fun.'],mean:['My {toy}. Nobody else touches it.']
+};
+const RESTL=['Ahh, the {furn}. Lovely.','Time for a rest on the {furn}.','Nobody bother me. I’m on the {furn}.'];
+const TREATL={
+ kind:['Thank you! I’ll save a crumb for a friend.'],playful:['YUM! Can I have seven more? That’s 7 × 7 = 49 more!'],shy:['...th-thank you. *nibble*'],
+ royal:['A treat fit for a queen!'],sleepy:['Mmm... tasty... zzz'],cheeky:['Nom nom! Got any more?'],showoff:['Only the finest treats for me. Thank you!'],
+ bossy:['About time! ...It’s good. Thank you.'],grumpy:['Hmph. ...That’s actually delicious.'],mean:['...Okay. You’re not so bad.']
+};
+const ACT={
+ kind:[{v:1,l:['Hug time, {B}!','Come here, {B}! I need a hug!'],fx:'💖'},{v:1,l:['{B}, your shell looks extra shiny today!','You’re a really good friend, {B}.']},{v:1,l:['Want half my seagrass sandwich, {B}?','I saved you a strawberry, {B}!'],fx:'🍓'}],
+ playful:[{v:1,play:true,l:['Tag, {B}! You’re it!','Bet you can’t catch me, {B}!']},{v:1,l:['{B}! Why did the turtle cross the reef? To get to the other TIDE!','{B}, what’s 10 × 10? A HUNDRED jokes! Ha!']}],
+ shy:[{v:1,l:['...h-hi, {B}.','*waves a tiny flipper at {B}*']}],
+ royal:[{v:1,l:['Good day, {B}. You may bow now.','{B}, you are now a Knight of the Lagoon!']}],
+ sleepy:[{v:1,nap:true,l:['Yawwn... hi {B}... can I nap next to you?','{B}... are you a pillow? ...zzz']}],
+ cheeky:[{v:-1,prank:true,l:['Splash attack, {B}! 💦','Boo! Ha, got you, {B}!'],fx:'💦'},{v:1,l:['{B}! What do you call a turtle who takes photos? A SNAPPING turtle!']}],
+ showoff:[{v:0,l:['Look, {B}! I can hold my breath for 12 × 12 = 144 seconds!','{B}, did you see my amazing flipper twirl? Of course you did.']}],
+ bossy:[{v:-1,l:['{B}! Stand up straight! No, straighter!','{B}, go and fetch me a snack. Chop chop!']}],
+ grumpy:[{v:-1,l:['Ugh, {B}. You’re standing in MY sunshine.','{B}, you’re chewing too loud.']}],
+ mean:[{v:-1,l:['Hey {B}, your shell looks like a soggy biscuit!','{B} is a slowpoke! Slow-poke!']},{v:-1,l:['Oops! Did I splash you, {B}? I totally meant to.'],fx:'💦'}]
+};
+const SOFT={bossy:['{B}... nice job today. Don’t let it go to your head.'],grumpy:['Hmph. Nice day, {B}. I suppose.'],mean:['...Hi, {B}. Your hat’s kind of cool.']};
+const REPLY={
+ kind:{pos:['Aww, thank you, {A}! You’re the best!','{A}, you made my day!'],neg:['That wasn’t very nice, {A}. But I’ll still be your friend.','Oh {A}... are you having a bad day?'],prank:['Hee hee, you got me, {A}!']},
+ playful:{pos:['Yay! Let’s do something fun, {A}!','Ha ha! Good one, {A}!'],neg:['Hey! That’s not how you play, {A}!'],prank:['SPLASH WAR! You’re on, {A}!']},
+ shy:{pos:['*blushes* ...thanks, {A}.','...hi, {A}. *smiles*'],neg:['*hides in shell* 😢'],prank:['Eek! *hides in shell*']},
+ royal:{pos:['How delightful, {A}.','One approves, {A}.'],neg:['How DARE you, {A}! Guards! ...Oh. I don’t have guards.'],prank:['Most unroyal, {A}!']},
+ sleepy:{pos:['Mmm... that’s nice... zzz','Zzz... you too, {A}...'],neg:['Zzz... huh? Did someone say something?'],prank:['Zzz... is it raining?']},
+ cheeky:{pos:['Ha! You’re alright, {A}.','Nice one, {A}!'],neg:['Oh yeah? Well YOUR shell smells like old seaweed, {A}!'],prank:['Oh, it’s ON, {A}!']},
+ showoff:{pos:['Naturally. But thank you, {A}!','I know. But it’s nice to hear, {A}.'],neg:['Rude! Do you know who I AM, {A}?'],prank:['My SHELL! You splashed my shell, {A}!']},
+ bossy:{pos:['Fine. But only for ONE minute, {A}.'],neg:['Say that again, {A}. I dare you!'],prank:['Right, {A}. You’re in BIG trouble.']},
+ grumpy:{pos:['Hmph. Whatever. ...Thanks.'],neg:['Oh, you want trouble, {A}?'],prank:['Do NOT splash me, {A}.']},
+ mean:{pos:['Ew. Go away, {A}.','Nobody asked, {A}.'],neg:['Say that again, {A}!','You’re gonna be sorry, {A}!'],prank:['You’re gonna pay for that, {A}!']}
+};
+const FIGHTL=['Take that!','Hey!','Ow! My shell!','Stop it!','You started it!','No, YOU started it!','Grrr!','Let go!'];
+const SPLIT={bossy:'I’m telling on you!',grumpy:'Hmph! Fine.',mean:'I was winning anyway.',cheeky:'Okay, okay! Truce!',showoff:'My shell! Is it scratched?!',royal:'Unhand me! ...Thank you.',kind:'Sorry, I got upset.',playful:'Sorry! That got too rough.',shy:'*shaking* ...thank you.',sleepy:'...what happened?'};
+
+/* ================= STATE ================= */
+const KEY='turtle-squares-2-save-v1';
+function fresh(){return {owned:['pebble'],stars:{},coins:0,inv:{},placed:[],outfits:{},happy:{},worn:{},learned:[],misses:{},muted:false,welcomed:false,peace:0,pu:0}}
+function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign(fresh(),JSON.parse(r))}catch(e){}return fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let saveT=null;function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,800)}
+let S=load();
+
+function hap(id){const v=S.happy[id];return v==null?60:v}
+function changeHappy(id,d){S.happy[id]=clamp(hap(id)+d,0,100);saveSoon()}
+function moodWord(h){return h<20?'Miserable':h<40?'Upset':h<60?'Okay':h<80?'Happy':'Overjoyed'}
+function heartStr(h){const n=Math.max(0,Math.min(5,Math.round(h/20)));return '♥'.repeat(n)+'♡'.repeat(5-n)}
+function addCoins(n){S.coins+=n;updatePills();saveSoon()}
+function updatePills(){
+  document.querySelectorAll('.coins').forEach(e=>e.textContent=`🪙 ${S.coins}`);
+  document.querySelectorAll('.tcount').forEach(e=>e.textContent=`🐢 ${S.owned.length} / ${TURTLES.length}`);
+}
+const placedCount=id=>S.placed.filter(r=>r.id===id).length;
+
+/* ================= SOUND ================= */
+let ac=null;
+function tone(freqs,dur=.1,type='sine',vol=.08){
+  if(S.muted)return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const t=ac.currentTime;
+    freqs.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+i*dur);g.gain.linearRampToValueAtTime(vol,t+i*dur+.01);g.gain.exponentialRampToValueAtTime(.0001,t+i*dur+dur);
+      o.connect(g);g.connect(ac.destination);o.start(t+i*dur);o.stop(t+i*dur+dur+.03)});
+  }catch(e){}
+}
+const sfx={ok:()=>tone([660,990],.08),bad:()=>tone([300,210],.14,'triangle'),free:()=>tone([523,659,784,1046],.11),tap:()=>tone([540],.04,'sine',.05),
+  win:()=>tone([523,659,784,659,784,1046],.12),coin:()=>tone([988,1319],.07,'square',.035),fight:()=>tone([190,150,190,150],.07,'sawtooth',.03),
+  lift:()=>tone([500,800],.05,'sine',.05),drop:()=>tone([620,420],.05,'sine',.05),pop:()=>tone([720,960],.05,'sine',.05)};
+
+/* ================= TURTLE ART ================= */
+const heartP=(cx,cy,s)=>`M${cx},${cy+s*.9} C${cx-s*1.6},${cy-s*.2} ${cx-s*.6},${cy-s*1.3} ${cx},${cy-s*.35} C${cx+s*.6},${cy-s*1.3} ${cx+s*1.6},${cy-s*.2} ${cx},${cy+s*.9}Z`;
+function starP(cx,cy,r){let p='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;p+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1)}return p+'Z'}
+const flowerAt=(x,y,c)=>`<g transform="translate(${x},${y})">${[0,90,180,270].map(r=>`<circle cx="${(3*Math.cos(r*Math.PI/180)).toFixed(1)}" cy="${(3*Math.sin(r*Math.PI/180)).toFixed(1)}" r="2.6" fill="${c}"/>`).join('')}<circle r="1.8" fill="#FFE45C"/></g>`;
+const WEAR={
+ partyhat:`<g transform="rotate(12 110 31)"><path d="M100,32 L110,6 L120,32Z" fill="#8E6CE0"/><path d="M103,25 L117,25 M106,17 L114,17" stroke="#FFC93C" stroke-width="3"/><circle cx="110" cy="6" r="4" fill="#FF6B7F"/></g>`,
+ pirate:`<g transform="rotate(8 110 31)"><path d="M92,32 Q95,13 110,16 Q125,13 128,32 Q110,25 92,32Z" fill="#2B2B3A"/><circle cx="110" cy="22.5" r="3.2" fill="#fff"/><path d="M106.5,27.5 L113.5,27.5" stroke="#fff" stroke-width="1.6"/></g>`,
+ cowboy:`<g transform="rotate(8 110 31)"><path d="M99,31 Q97,14 104,15 Q110,19 116,15 Q123,14 121,31Z" fill="#C07A3A"/><rect x="99" y="25" width="22" height="3.5" fill="#6E401A"/><ellipse cx="110" cy="31" rx="20" ry="4.5" fill="#A8672F"/></g>`,
+ wizard:`<g transform="rotate(10 110 31)"><path d="M99,31 L115,-14 L122,31Z" fill="#5A55D6"/><path d="${starP(111,15,4.5)}" fill="#FFC93C"/><circle cx="114" cy="1" r="1.8" fill="#fff"/><ellipse cx="110" cy="31" rx="17" ry="4" fill="#3D3A9E"/></g>`,
+ chef:`<g transform="rotate(6 110 31)" fill="#fff" stroke="#D5DCE4" stroke-width="1.2"><circle cx="102" cy="17" r="7"/><circle cx="118" cy="17" r="7"/><circle cx="110" cy="13" r="8.5"/><rect x="100" y="20" width="20" height="12" rx="2"/></g>`,
+ flowercrown:`<g>${flowerAt(98,35,'#FF9DC0')}${flowerAt(103,29.5,'#FFB86B')}${flowerAt(110,27.5,'#FF6B7F')}${flowerAt(117,29.5,'#B99CFF')}${flowerAt(122,35,'#FF9DC0')}</g>`,
+ viking:`<g transform="rotate(6 110 31)"><path d="M98,24 Q87,21 89,8 Q93,18 100,20Z" fill="#F4E9CF" stroke="#CDBF9C"/><path d="M122,24 Q133,21 131,8 Q127,18 120,20Z" fill="#F4E9CF" stroke="#CDBF9C"/><path d="M97,32 Q97,15 110,15 Q123,15 123,32Z" fill="#9AA6B2"/><rect x="96" y="29" width="28" height="4.5" rx="2" fill="#6E7A86"/><circle cx="104" cy="31.2" r="1.2" fill="#DDE3E8"/><circle cx="110" cy="31.2" r="1.2" fill="#DDE3E8"/><circle cx="116" cy="31.2" r="1.2" fill="#DDE3E8"/></g>`,
+ propeller:`<g transform="rotate(8 110 31)"><path d="M98,32 Q98,18 110,18 Q122,18 122,32Z" fill="#FF6B7F"/><path d="M110,18 L110,31" stroke="#FFC93C" stroke-width="3"/><rect x="97" y="30" width="26" height="3.5" rx="1.7" fill="#2F7FC0"/><rect x="109" y="11" width="2" height="7" fill="#555"/><ellipse class="prop" cx="110" cy="11" rx="10" ry="2.3" fill="#4FA3E0"/></g>`,
+ bunnyears:`<g transform="rotate(10 110 31)"><g transform="rotate(-12 104 18)"><ellipse cx="104" cy="18" rx="4.6" ry="13" fill="#fff" stroke="#E7D5DC"/><ellipse cx="104" cy="18" rx="2.2" ry="9" fill="#FFB3C7"/></g><g transform="rotate(12 116 18)"><ellipse cx="116" cy="18" rx="4.6" ry="13" fill="#fff" stroke="#E7D5DC"/><ellipse cx="116" cy="18" rx="2.2" ry="9" fill="#FFB3C7"/></g></g>`,
+ crown:`<g transform="rotate(8 110 31)"><path d="M98,33 L98,20 L104,26 L110,14 L116,26 L122,20 L122,33Z" fill="#FFC93C" stroke="#D99A18" stroke-width="1.5"/><circle cx="110" cy="28" r="2.2" fill="#E0475B"/><circle cx="103" cy="29.5" r="1.6" fill="#4FA3E0"/><circle cx="117" cy="29.5" r="1.6" fill="#4FA3E0"/></g>`,
+ shades:`<g><path d="M106.5,40 L98,42.5" stroke="#1C2533" stroke-width="2"/><rect x="106" y="36" width="16" height="10" rx="3.5" fill="#1C2533"/><path d="M109,38.5 L113,38.5" stroke="#fff" stroke-width="1.4" opacity=".6"/></g>`,
+ heartglasses:`<g><path d="M106.5,40 L98,42.5" stroke="#B8304A" stroke-width="2"/><path d="${heartP(114,41,6.5)}" fill="#FF4F79" stroke="#B8304A" stroke-width="1.2"/></g>`,
+ monocle:`<g><path d="M114,48 Q109,58 102,60" stroke="#D9A21B" stroke-width="1.2" fill="none"/><circle cx="114" cy="41" r="7" fill="rgba(255,255,255,.28)" stroke="#D9A21B" stroke-width="2"/></g>`,
+ starglasses:`<g><path d="M106.5,41 L98,43" stroke="#D99A18" stroke-width="2"/><path d="${starP(114,41,8.5)}" fill="rgba(255,201,60,.8)" stroke="#D99A18" stroke-width="1.3"/></g>`,
+ moustache:`<path d="M119.5,49 q-4,-3.5 -9,0.5 q4,3 9,-0.2 q5,3.2 9,0 q-5,-4 -9,-0.3Z" fill="#5A3A22"/>`,
+ bowtie:`<g transform="translate(97,60) rotate(-10)"><path d="M0,0 L-7,-5 L-7,5Z M0,0 L7,-5 L7,5Z" fill="#E0475B"/><circle r="2.4" fill="#B8304A"/></g>`,
+ scarf:`<g><path d="M88,50 Q98,61 109,55 L109,61 Q98,68 88,56Z" fill="#4FA3E0"/><path d="M92,55 L93,61 M98,57.5 L98.5,64 M104,57 L104,63" stroke="#fff" stroke-width="2"/><rect x="89" y="56" width="6" height="13" rx="3" fill="#2F7FC0"/></g>`,
+ lei:`<g>${[[89,53,'#FF6B7F'],[93,58,'#FFC93C'],[98,61,'#FF9DC0'],[103.5,60.5,'#B99CFF'],[108,57,'#FF6B7F']].map(([x,y,c])=>flowerAt(x,y,c)).join('')}</g>`,
+ pearls:`<g fill="#FFFDF5" stroke="#D8CFBF" stroke-width=".8">${[[89,53],[92,56.5],[95.5,59],[99.5,60.5],[103.5,60],[107,58]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.4"/>`).join('')}</g>`,
+ bandana:`<g><path d="M88,50 Q98,61 109,55 L100,70Z" fill="#E0475B"/><g fill="#fff"><circle cx="97" cy="60" r="1.2"/><circle cx="101" cy="64" r="1.2"/><circle cx="103" cy="58.5" r="1.2"/></g></g>`,
+ cape:{over:`<path d="M94,42 C76,30 46,34 18,68 L56,68 Q78,60 94,50Z" fill="#E0475B"/><path d="M94,42 C80,36 62,38 48,46" stroke="#B8304A" stroke-width="2" fill="none"/>`},
+ wings:{under:`<g class="wing"><ellipse cx="44" cy="4" rx="10" ry="22" transform="rotate(-28 44 4)" fill="#D9C8FF" stroke="#9D84F0" stroke-width="1.5" opacity=".9"/><ellipse cx="62" cy="1" rx="9" ry="20" transform="rotate(14 62 1)" fill="#EAE0FF" stroke="#9D84F0" stroke-width="1.5" opacity=".9"/></g>`},
+ balloon:{over:`<g class="bob"><path d="M60,17 Q52,2 42,-6" stroke="#666" stroke-width="1" fill="none"/><path d="M42,-6 l-2.5,3 5,0Z" fill="#E04A60"/><ellipse cx="42" cy="-16" rx="8" ry="10" fill="#FF6B7F"/><path d="M38,-21 q2,-3.5 5,-2.5" stroke="#fff" stroke-width="1.6" fill="none" opacity=".7"/></g>`},
+ jetpack:{over:`<g><path class="flame" d="M34,12.5 L22,15.5 L34,18.5Z M34,21.5 L24,24 L34,26.5Z" fill="#FFB61E"/><rect x="34" y="10" width="30" height="8.5" rx="4.2" fill="#B5BFC9" stroke="#6E7A86" stroke-width="1.2"/><rect x="34" y="19" width="30" height="8.5" rx="4.2" fill="#9AA6B2" stroke="#6E7A86" stroke-width="1.2"/></g>`},
+ rainbow:`<g opacity=".72">${['#FF6B7F','#FFB61E','#FFE45C','#7ED957','#4FA3E0','#8E6CE0'].map((c,i)=>`<rect x="20" y="${16+i*8}" width="84" height="8" fill="${c}"/>`).join('')}</g>`,
+ polka:`<g fill="#fff" opacity=".85">${[[36,50,5],[50,34,4.5],[64,48,6],[78,32,4.5],[88,52,5],[54,58,3],[70,23,3]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g>`,
+ stars:`<g fill="#FFE45C" stroke="#D99A18" stroke-width=".8">${[[40,48,6],[60,30,7],[80,46,6],[62,55,4],[46,33,3.5]].map(([x,y,r])=>`<path d="${starP(x,y,r)}"/>`).join('')}</g>`,
+ zigzag:`<path d="M20,40 L36,31 L50,43 L64,31 L78,43 L92,31 L104,39 L104,47 L92,39 L78,51 L64,39 L50,51 L36,39 L20,48Z" fill="#FFC93C" stroke="#D99A18" stroke-width="1"/>`,
+ hearts:`<g fill="#FF6FA0">${[[40,48,5],[58,32,5.5],[78,46,5],[64,55,3.5],[88,34,3.5]].map(([x,y,s])=>`<path d="${heartP(x,y,s)}"/>`).join('')}</g>`
+};
+const FACES=`<ellipse cx="111" cy="51" rx="4" ry="2.3" fill="#FF8FA3" opacity=".7"/>
+<g class="fc fc-norm"><circle cx="114" cy="41" r="5" fill="#1C2533"/><circle cx="115.8" cy="39.2" r="1.9" fill="#fff"/><path d="M116,51 Q120,53.5 123.5,49.5" stroke="#1C2533" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+<g class="fc fc-happy"><path d="M109,43 Q114,36 119,43" stroke="#1C2533" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M114,50 Q119.5,57 124.5,49Z" stroke="#1C2533" stroke-width="2" fill="#E0475B" stroke-linejoin="round"/></g>
+<g class="fc fc-angry"><circle cx="114" cy="42" r="4.5" fill="#1C2533"/><circle cx="115.5" cy="40.6" r="1.6" fill="#fff"/><path d="M107,33.5 L120.5,38" stroke="#1C2533" stroke-width="2.8" stroke-linecap="round"/><path d="M116,53 Q120,49.5 124,53" stroke="#1C2533" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+<g class="fc fc-sad"><circle cx="114" cy="42" r="4.6" fill="#1C2533"/><circle cx="115.6" cy="40.4" r="1.7" fill="#fff"/><path d="M108,35 L119,32.5" stroke="#1C2533" stroke-width="2" stroke-linecap="round"/><path d="M116.5,53.5 Q120,50.5 123.5,53.5" stroke="#1C2533" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M111,47.5 q-2.2,4 0,5.8 q2.2,-1.8 0,-5.8Z" fill="#6EC6FF"/></g>
+<g class="fc fc-sleep"><path d="M109,42 Q114,46 119,42" stroke="#1C2533" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="120" cy="51.5" r="2" fill="#1C2533"/></g>`;
+
+function turtleSVG(t,opt={}){
+  const sp=SPECIES[t.species];const id='c'+(uid++);const sil=!!opt.silhouette;
+  const o=sil?{}:(opt.outfit||S.outfits[t.id]||{});
+  const shell=sil?'var(--sil)':(t.shell||sp.shell),pat=sp.pat,skin=sil?'var(--sil)':sp.skin,rim=sil?'var(--sil)':(t.gold?'#FFE7A0':sp.rim);
+  let pattern='';
+  if(!sil){
+    if(sp.pattern==='hex')pattern=`<g fill="${pat}" opacity=".5"><path d="M50,30 L61,23 L72,30 L72,43 L61,50 L50,43Z"/><path d="M28,50 L38,36 L47,40 L47,52 L37,58Z"/><path d="M75,40 L85,36 L96,50 L87,58 L75,52Z"/><path d="M52,52 L61,56 L70,52 L70,62 L52,62Z"/></g>`;
+    else if(sp.pattern==='ridges')pattern=`<g stroke="${pat}" stroke-width="2.5" fill="none" opacity=".75"><path d="M32,62 Q44,26 61,20"/><path d="M61,20 Q60,40 61,62"/><path d="M90,62 Q80,28 61,20"/></g><g fill="${pat}" opacity=".7"><circle cx="45" cy="44" r="2.5"/><circle cx="72" cy="36" r="2"/><circle cx="78" cy="52" r="2.5"/><circle cx="52" cy="30" r="2"/></g>`;
+    else pattern=`<g fill="${pat}" opacity=".55"><circle cx="48" cy="36" r="6"/><circle cx="66" cy="30" r="5"/><circle cx="80" cy="46" r="6"/><circle cx="40" cy="52" r="5"/><circle cx="62" cy="50" r="7"/></g>`;
+  }
+  const back=(o.back&&WEAR[o.back])||{};
+  const paint=o.shell?WEAR[o.shell]:'';
+  const glint=t.gold&&!sil?`<g class="glint" fill="#fff"><path d="${starP(44,30,4)}"/><path d="${starP(78,25,3)}"/></g>`:'';
+  const q=opt.question?`<text x="61" y="52" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="26" fill="var(--panel)">?</text>`:'';
+  return `<svg class="turtle-svg" viewBox="-2 -30 136 120" aria-hidden="true">
+<defs><clipPath id="${id}"><path d="M22,62 C22,30 40,16 61,16 C84,16 100,32 100,62Z"/></clipPath></defs>
+${back.under||''}<path d="M24,60 L10,63 L24,67Z" fill="${skin}"/>
+<g transform="rotate(-18 32 68)"><ellipse class="fb" cx="32" cy="68" rx="13" ry="6" fill="${skin}"/></g>
+<path d="M22,62 C22,30 40,16 61,16 C84,16 100,32 100,62Z" fill="${shell}"/>
+<g clip-path="url(#${id})">${pattern}${paint}</g>
+<ellipse cx="61" cy="63" rx="43" ry="6" fill="${rim}"/>${glint}${back.over||''}
+<g transform="rotate(22 86 71)"><ellipse class="ff" cx="86" cy="71" rx="16" ry="6.5" fill="${skin}"/></g>
+<g class="headg"><ellipse cx="98" cy="54" rx="11" ry="8" fill="${skin}"/><circle cx="110" cy="44" r="14" fill="${skin}"/>${sil?'':FACES}${o.neck?WEAR[o.neck]:''}${o.face?WEAR[o.face]:''}${o.head?WEAR[o.head]:''}</g>${q}</svg>`;
+}
+
+/* ================= NAVIGATION ================= */
+let current='home';
+function go(screen){
+  if(current==='game'&&screen!=='game')stopBonus();
+  current=screen;
+  document.querySelectorAll('.screen').forEach(el=>el.hidden=el.id!==screen);
+  window.scrollTo(0,0);
+  updatePills();
+  if(screen==='home')renderHome();
+  if(screen==='missions')renderLevels();
+  if(screen==='book')renderBook();
+  if(screen==='academy')renderAcademy();
+  if(screen==='shop')renderShop();
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){sfx.tap();if(!$('#modal').hidden)closeModal();go(b.dataset.go)}});
+
+function openModal(html,wide=false){const p=$('#modalBody');p.className='panel'+(wide?' wide':'');p.innerHTML=html;$('#modal').hidden=false;const b=p.querySelector('button');if(b)b.focus({preventScroll:true})}
+function closeModal(){$('#modal').hidden=true;cardId=null}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#modal').hidden)closeModal()});
+let toastT=null;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
+function party(emojis=['🫧','💚','🐢','⭐','🫧']){
+  if(reduced)return;const p=$('#party');
+  for(let i=0;i<26;i++){const s=document.createElement('span');s.textContent=emojis[i%emojis.length];s.style.left=rnd(0,100)+'%';s.style.animationDelay=rnd(0,.6)+'s';s.style.fontSize=rnd(20,38)+'px';p.appendChild(s);setTimeout(()=>s.remove(),3000)}
+}
+$('#muteBtn').addEventListener('click',()=>{S.muted=!S.muted;save();$('#muteBtn').textContent=S.muted?'🔇':'🔊';sfx.tap()});
+
+/* ================= THE PEN ================= */
+const BX0=5,BX1=95,BY0=47,BY1=95;
+const timers=new Set();
+function later(fn,ms){const id=setTimeout(()=>{timers.delete(id);fn()},ms);timers.add(id);return id}
+function clearLater(){timers.forEach(clearTimeout);timers.clear()}
+let walkers=[],pitems=[],fights=[],raf=null,lastT=0,dirT=2;
+
+(function drawFence(){
+  let h='<path d="M0,238 L1000,238 M0,256 L1000,256" style="stroke:var(--fence-deep)" stroke-width="7"/><path d="M0,236 L1000,236 M0,254 L1000,254" style="stroke:var(--fence)" stroke-width="5"/>';
+  for(let x=24;x<1000;x+=46)h+=`<path d="M${x-7},272 L${x-7},230 L${x},220 L${x+7},230 L${x+7},272Z" style="fill:var(--fence);stroke:var(--fence-deep)" stroke-width="2.5"/>`;
+  $('#fence').innerHTML=h;
+})();
+
+function renderHome(){
+  $('#muteBtn').textContent=S.muted?'🔇':'🔊';
+  const next=LEVELS.find(L=>unlocked(L)&&(S.stars[L.id]||0)<3);
+  $('#missionHint').textContent=next?`Next up: ${next.name}`:'Every star won!';
+  const left=TURTLES.length-S.owned.length;
+  $('#bookHint').textContent=left?`${left} turtles still out at sea`:'Everyone is home!';
+  $('#academyHint').textContent=`${S.learned.length} of ${LESSONS.length} tricks learned`;
+  $('#shopHint').textContent=`Outfits, toys and furniture`;
+  buildPen();
+}
+function buildPen(){
+  clearLater();fights=[];
+  const st=$('#stage');st.innerHTML='';
+  pitems=S.placed.map(makeItemEl).filter(Boolean);
+  walkers=S.owned.map(id=>BYID[id]).filter(Boolean).map(makeWalker);
+  updateAlert();
+  if(!raf){lastT=performance.now();raf=requestAnimationFrame(tick)}
+}
+function makeItemEl(rec){
+  const it=ITEM[rec.id];if(!it)return null;
+  const el=document.createElement('button');el.className='pitem '+(it.cat==='toy'?'toy':'furn');el.type='button';
+  el.textContent=it.emoji;el.setAttribute('aria-label',`${it.name}. Tap for options, or drag to move it.`);
+  const p={rec,it,el,user:null};el._p=p;
+  el.addEventListener('click',()=>{if(suppressClick)return;sfx.tap();itemMenu(p)});
+  $('#stage').appendChild(el);placeItem(p);return p;
+}
+function placeItem(p){p.el.style.left=p.rec.x+'%';p.el.style.top=p.rec.y+'%';p.el.style.zIndex=Math.round(p.rec.y*10)}
+function makeWalker(t){
+  const el=document.createElement('button');el.className='wander';el.type='button';
+  el.setAttribute('aria-label',`${t.name}. Tap to see ${t.name}. Press and hold to pick up.`);
+  el.innerHTML=`<span class="speech" aria-hidden="true"></span><span class="wbody"><span class="wflip">${turtleSVG(t)}</span></span><span class="wname">${PERS[t.p].icon} ${t.name}</span><span class="zz" aria-hidden="true">z z z</span>`;
+  const w={t,el,x:rnd(8,92),y:rnd(BY0+2,BY1-1),tx:0,ty:0,state:'idle',timer:rnd(0,2.5),face:Math.random()<.5?1:-1,act:null,conv:null,fight:null,cd:rnd(2,9),
+    sp:el.querySelector('.speech'),sayUntil:0,mood:'',tm:null,tmEnd:0,hop:false,run:false,follow:null,onArrive:null,toy:null,seat:null,chaseEnd:0};
+  el._w=w;
+  el.addEventListener('click',()=>{if(suppressClick)return;sfx.tap();openTurtle(t.id)});
+  $('#stage').appendChild(el);return w;
+}
+function refreshWalker(id){const w=walkers.find(x=>x.t.id===id);if(w)w.el.querySelector('.wflip').innerHTML=turtleSVG(w.t)}
+const dist=(a,b)=>Math.hypot(a.x-b.x,(a.y-b.y)*1.6);
+const distP=(w,p)=>Math.hypot(w.x-p.rec.x,(w.y-p.rec.y)*1.6);
+function effNice(w){const h=hap(w.t.id);return PERS[w.t.p].nice+(h>=80?1:h<30?-1:0)}
+function say(w,text,ms=2400){w.sp.textContent=text;w.sp.dataset.edge=w.x>80?'r':w.x<20?'l':'';w.sp.classList.add('on');w.sayUntil=performance.now()+ms}
+function setMood(w,m,ms){w.tm=m;w.tmEnd=performance.now()+ms}
+function burst(w,emo,n=4){
+  if(reduced)n=1;const st=$('#stage');
+  for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fx';s.textContent=emo;s.style.left=(w.x+rnd(-3,3))+'%';s.style.top=(w.y-rnd(10,16))+'%';s.style.animationDelay=rnd(0,.35)+'s';st.appendChild(s);setTimeout(()=>s.remove(),1800)}
+}
+function free(w){return !w.fight&&!w.conv&&(w.state==='idle'||(w.state==='walk'&&!w.onArrive&&!w.run))}
+function setTarget(w,x,y,cb){w.state='walk';w.tx=clamp(x,BX0,BX1);w.ty=clamp(y,BY0,BY1);w.onArrive=cb||null}
+function busy(w,act,secs){w.state='busy';w.act=act;w.timer=secs}
+function wander(w){setTarget(w,w.x+rnd(-30,30),w.y+rnd(-18,18))}
+function release(w){
+  if(w.conv)endConv(w.conv);
+  pitems.forEach(p=>{if(p.user===w){p.user=null;p.el.classList.remove('inuse')}});
+  w.toy=null;w.seat=null;
+  walkers.forEach(o=>{if(o.follow===w){o.follow=null;o.hop=false;if(o.state==='follow'){o.state='idle';o.timer=1}}});
+  w.follow=null;w.run=false;w.hop=false;w.chaseEnd=0;w.act=null;w.onArrive=null;
+}
+function kick(w){release(w);if(w.state==='busy'||w.state==='follow'){w.state='idle';w.timer=rnd(.5,1.5)}}
+function finishBusy(w){
+  if(w.act==='talk'&&w.conv&&!w.conv.dead){w.timer=1;return}
+  pitems.forEach(p=>{if(p.user===w){p.user=null;p.el.classList.remove('inuse')}});
+  w.toy=null;w.seat=null;w.act=null;w.hop=false;w.state='idle';w.timer=rnd(.5,2.5);
+}
+
+function tick(now){
+  if(current!=='home'){raf=null;return}
+  const dt=Math.min(.05,(now-lastT)/1000);lastT=now;
+  dirT-=dt;if(dirT<=0){director();dirT=rnd(1.5,3)}
+  for(const w of walkers)step(w,dt,now);
+  for(const f of fights.slice())stepFight(f,dt);
+  for(const w of walkers)paint(w,now);
+  raf=requestAnimationFrame(tick);
+}
+function moveTo(w,tx,ty,sp,dt,arrive){
+  const dx=tx-w.x,dy=(ty-w.y)*1.6,d=Math.hypot(dx,dy);
+  if(d<.8){if(arrive)arrive();return}
+  const s=Math.min(d,sp*dt);w.x+=dx/d*s;w.y+=dy/d*s/1.6;
+  if(Math.abs(dx)>.3)w.face=dx<0?-1:1;
+}
+function step(w,dt){
+  w.cd-=dt;
+  const spd=(w.t.speed||1)*(reduced?.5:1);
+  switch(w.state){
+    case 'idle':w.timer-=dt;if(w.timer<=0){if(w.t.p==='sleepy'&&Math.random()<.35)busy(w,'nap',rnd(6,11));else wander(w)}break;
+    case 'busy':w.timer-=dt;if(w.timer<=0)finishBusy(w);break;
+    case 'walk':moveTo(w,w.tx,w.ty,6*spd*(w.run?1.9:1),dt,()=>{w.state='idle';w.timer=rnd(1,3.5)/Math.max(.5,spd);const cb=w.onArrive;w.onArrive=null;if(cb)cb()});break;
+    case 'follow':{const L=w.follow;if(!L||L.state!=='walk'||!L.run){w.state='idle';w.follow=null;w.hop=false;w.timer=rnd(1,2);break}
+      moveTo(w,L.x-5*L.face,L.y,6*spd*1.8,dt,null);break}
+  }
+}
+function paint(w,now){
+  const el=w.el;
+  el.style.left=w.x+'%';el.style.top=w.y+'%';
+  const talking=now<w.sayUntil;
+  el.style.zIndex=w.state==='held'?5000:Math.round(w.y*10)+(talking?1500:0);
+  el.classList.toggle('left',w.face<0);
+  el.classList.toggle('walking',w.state==='walk'||w.state==='follow'||w.state==='held');
+  el.classList.toggle('hop',w.hop);
+  el.classList.toggle('held',w.state==='held');
+  el.classList.toggle('fighting',!!w.fight&&w.state!=='held');
+  el.classList.toggle('resting',w.act==='rest'||w.act==='nap');
+  el.classList.toggle('hiding',w.act==='hide');
+  if(!talking&&w.sp.classList.contains('on'))w.sp.classList.remove('on');
+  let m='norm';
+  if(w.fight)m='angry';
+  else if(w.act==='rest'||w.act==='nap')m='sleep';
+  else if(w.tm&&now<w.tmEnd)m=w.tm;
+  else if(hap(w.t.id)<25)m='sad';
+  else if(w.act==='play'||w.hop)m='happy';
+  if(m!==w.mood){w.mood=m;el.dataset.mood=m}
+}
+
+/* --- what happens in the pen --- */
+function director(){
+  if(!walkers.length)return;
+  const freeW=walkers.filter(free);if(!freeW.length)return;
+  const r=Math.random();
+  const toys=pitems.filter(p=>p.it.cat==='toy'),seats=pitems.filter(p=>p.it.rest);
+  const talking=walkers.filter(w=>w.conv).length;
+  if(r<.45){if(walkers.length>1&&talking<6)social(pick(freeW.filter(w=>w.cd<=0)));return}
+  if(r<.66){if(toys.length)toyTrip(pick(freeW),toys);else wander(pick(freeW));return}
+  if(r<.78){if(seats.length)restTrip(pickRest(freeW),seats);return}
+  const w=pick(walkers.filter(w=>w.state!=='held'&&!w.fight&&!w.conv&&w.act!=='nap'&&w.act!=='rest'));
+  if(w)say(w,Math.random()<.2?w.t.quote:pick(SOLO[w.t.p]),2800);
+}
+function social(A){
+  if(!A)return;
+  const others=walkers.filter(o=>o!==A&&free(o));if(!others.length)return;
+  others.sort((a,b)=>dist(A,a)-dist(A,b));
+  const B=Math.random()<.7?others[0]:pick(others);
+  A.cd=rnd(7,14);B.cd=Math.max(B.cd,4);
+  busy(B,'wait',8);
+  const side=A.x<B.x?-1:1;
+  setTarget(A,B.x+side*7,B.y+rnd(-1,1),()=>{
+    if(B.state==='busy'&&B.act==='wait'&&!B.fight&&dist(A,B)<15)meet(A,B);
+    else if(B.act==='wait')finishBusy(B);
+  });
+}
+function converse(A,B,steps,after){
+  const conv={a:A,b:B,dead:false};
+  [A,B].forEach(w=>{w.state='busy';w.act='talk';w.conv=conv;w.timer=1});
+  A.face=B.x>A.x?1:-1;B.face=-A.face;
+  let t=0;
+  steps.forEach(([w,text,mood,fx])=>{
+    later(()=>{if(conv.dead)return;say(w,text,2500);if(mood)setMood(w,mood,2700);if(fx)burst(w,fx,4)},t);
+    t+=Math.max(1600,800+text.length*40);
+  });
+  later(()=>{if(conv.dead)return;endConv(conv);if(after)after()},t+150);
+}
+function endConv(conv){
+  conv.dead=true;
+  [conv.a,conv.b].forEach(w=>{if(w.conv===conv){w.conv=null;if(w.state==='busy'&&w.act==='talk'){w.state='idle';w.act=null;w.timer=rnd(.5,2)}}});
+}
+function meet(A,B){
+  const na=effNice(A),nb=effNice(B),pa=A.t.p,pb=B.t.p;
+  const F=s=>fill(s,{A:A.t.name,B:B.t.name});
+  let act;
+  if(SOFT[pa]&&na>=0&&Math.random()<.6)act={v:1,l:SOFT[pa]};
+  else act=pick(ACT[pa]);
+  const steps=[[A,F(pick(act.l)),act.v>0?'happy':act.v<0&&!act.prank?'angry':null,act.fx]];
+  let after=null;
+  const fightNow=()=>{steps.push([A,'That’s IT!','angry']);after=()=>startFight(A,B)};
+  if(act.v===1){
+    if(nb>=0){
+      steps.push([B,F(pick(REPLY[pb].pos)),'happy',act.fx==='💖'?'💖':'💛']);
+      after=()=>{changeHappy(A.t.id,5);changeHappy(B.t.id,5);if(act.play)startChase(A,B);else if(act.nap){busy(A,'nap',rnd(6,9))}};
+    }else if(pb==='mean'){
+      steps.push([B,F(pick(REPLY.mean.pos)),'angry']);
+      steps.push([A,'Oh... okay.','sad']);
+      after=()=>{changeHappy(A.t.id,-4)};
+    }else{
+      steps.push([B,F(pick(REPLY[pb].pos)),null]);
+      after=()=>{changeHappy(A.t.id,2);changeHappy(B.t.id,2)};
+    }
+  }else if(act.v===0){
+    if(nb>=1){steps.push([B,F(pick(['Wow! Amazing, {A}!','Ooh! Can you teach me, {A}?','That’s so cool, {A}!'])),'happy','⭐']);after=()=>{changeHappy(A.t.id,4);changeHappy(B.t.id,1)}}
+    else if(nb===0){steps.push([B,F(pick(['Big deal, {A}.','Yeah, yeah. We know, {A}.'])),null]);steps.push([A,'Hmph!','sad'])}
+    else{steps.push([B,F('Nobody cares, {A}!'),'angry']);if(na<=0&&Math.random()<.35)fightNow();else{steps.push([A,'How rude!','sad']);after=()=>changeHappy(A.t.id,-3)}}
+  }else if(act.prank){
+    steps.push([B,F(pick(REPLY[pb].prank)),null]);
+    if(['kind','playful','cheeky'].includes(pb)){steps[1][2]='happy';steps[1][3]='😂';after=()=>{changeHappy(A.t.id,3);changeHappy(B.t.id,3);if(pb!=='kind')startChase(A,B)}}
+    else if(pb==='shy'){steps[1][2]='sad';steps.push([A,F('Oops. Sorry, {B}!'),'sad']);after=()=>{changeHappy(B.t.id,-6);busy(B,'hide',5)}}
+    else if(pb==='sleepy'){}
+    else if(nb<0&&Math.random()<.55){steps[1][2]='angry';fightNow()}
+    else{steps[1][2]='angry';after=()=>changeHappy(B.t.id,-3)}
+  }else{
+    if(pb==='kind'){
+      steps.push([B,F(pick(REPLY.kind.neg)),'sad']);
+      if(Math.random()<.45){steps.push([A,F('...Sorry, {B}. That was mean.'),'sad']);steps.push([B,'That’s okay! Friends?','happy','💛']);after=()=>{changeHappy(A.t.id,5);changeHappy(B.t.id,2)}}
+      else{steps.push([A,'Hmph.',null]);after=()=>changeHappy(B.t.id,-2)}
+    }else if(pb==='playful'){steps.push([B,F(pick(REPLY.playful.neg)),'sad']);after=()=>changeHappy(B.t.id,-4)}
+    else if(pb==='shy'){steps.push([B,F(pick(REPLY.shy.neg)),'sad']);after=()=>{changeHappy(B.t.id,-8);busy(B,'hide',5)}}
+    else if(pb==='sleepy'){steps.push([B,F(pick(REPLY.sleepy.neg)),'sleep']);steps.push([A,'Ugh. Forget it.',null])}
+    else if(['cheeky','showoff','royal'].includes(pb)){steps.push([B,F(pick(REPLY[pb].neg)),'angry']);if(na<0&&Math.random()<.3)fightNow();else after=()=>changeHappy(B.t.id,-3)}
+    else{steps.push([B,F(pick(REPLY[pb].neg)),'angry']);if(Math.random()<.7)fightNow();else{steps.push([A,'Hmph! Not worth it.','angry']);after=()=>{changeHappy(A.t.id,-3);changeHappy(B.t.id,-3);wander(A);wander(B)}}}
+  }
+  converse(A,B,steps,after);
+}
+function startChase(A,B){
+  kick(A);kick(B);
+  A.chaseEnd=performance.now()+4500;A.hop=true;
+  const hopTo=()=>{
+    if(performance.now()<A.chaseEnd&&A.state!=='held'&&!A.fight){setTarget(A,rnd(BX0,BX1),rnd(BY0,BY1),hopTo);A.run=true;A.hop=true}
+    else{A.run=false;A.hop=false;changeHappy(A.t.id,3);changeHappy(B.t.id,3)}
+  };
+  hopTo();
+  if(B.state!=='held'&&!B.fight){B.state='follow';B.follow=A;B.hop=true}
+}
+function toyTrip(w,toys){
+  if(!w)return;
+  let toy=pick(toys);
+  const grabby=w.t.p==='mean'||(w.t.p==='cheeky'&&Math.random()<.4)||(w.t.p==='bossy'&&Math.random()<.3);
+  if(toy.user&&!grabby){const f=toys.filter(t=>!t.user);if(!f.length)return;toy=pick(f)}
+  setTarget(w,toy.rec.x+(Math.random()<.5?-4:4),toy.rec.y+1.5,()=>arriveToy(w,toy));
+}
+function arriveToy(w,toy){
+  if(!pitems.includes(toy)||distP(w,toy)>10)return;
+  const u=toy.user;
+  if(u&&u!==w){if(u.state==='busy'&&u.act==='play'&&!u.conv)snatch(w,u,toy);return}
+  playToy(w,toy);
+}
+function playToy(w,toy){
+  release(w);
+  toy.user=w;w.toy=toy;toy.el.classList.add('inuse');
+  busy(w,'play',rnd(4,7));w.hop=w.t.p==='playful';
+  w.face=toy.rec.x>w.x?1:-1;
+  if(Math.random()<.6)say(w,fill(pick(TOYL[w.t.p]),{toy:toy.it.name.toLowerCase()}),2500);
+  changeHappy(w.t.id,3);
+}
+function snatch(A,B,toy){
+  const F=s=>fill(s,{A:A.t.name,B:B.t.name,toy:toy.it.name.toLowerCase()});
+  kick(B);
+  const steps=[[A,F('Mine now! Thanks for the {toy}, {B}!'),'angry']];
+  let after;const pb=B.t.p;
+  if(pb==='kind'){steps.push([B,F('Oh... okay. You can have a turn, {A}.'),'sad']);after=()=>{changeHappy(B.t.id,-2);playToy(A,toy)}}
+  else if(pb==='shy'){steps.push([B,'*hides in shell* 😢','sad']);after=()=>{changeHappy(B.t.id,-6);busy(B,'hide',5);playToy(A,toy)}}
+  else if(effNice(B)<0||Math.random()<.35){steps.push([B,F('HEY! Give it back, {A}!'),'angry']);after=()=>startFight(A,B)}
+  else{steps.push([B,F('Not fair, {A}! I was playing with that!'),'sad']);after=()=>{changeHappy(B.t.id,-4);playToy(A,toy)}}
+  converse(A,B,steps,after);
+}
+function pickRest(list){const s=list.filter(w=>w.t.p==='sleepy');return s.length&&Math.random()<.6?pick(s):pick(list)}
+function restTrip(w,seats){
+  const f=seats.filter(s=>!s.user);if(!w||!f.length)return;
+  const s=pick(f);s.user=w;
+  setTarget(w,s.rec.x,s.rec.y+.6,()=>{
+    if(s.user!==w||!pitems.includes(s)){if(s.user===w)s.user=null;return}
+    w.seat=s;busy(w,'rest',rnd(6,11));
+    if(Math.random()<.5)say(w,fill(pick(RESTL),{furn:s.it.name.toLowerCase()}),2500);
+    changeHappy(w.t.id,2);
+  });
+}
+
+/* --- fights --- */
+function startFight(A,B){
+  if(A.fight||B.fight||A.state==='held'||B.state==='held')return;
+  kick(A);kick(B);
+  const mx=clamp((A.x+B.x)/2,BX0+4,BX1-4),my=clamp((A.y+B.y)/2,BY0+2,BY1);
+  const el=document.createElement('div');el.className='brawl';el.innerHTML='<span>💥</span><span>💨</span><span>⭐</span><span>💢</span>';
+  $('#stage').appendChild(el);
+  const f={a:A,b:B,el,t:0,ax:mx-3.5,ay:my,bx:mx+3.5,by:my};
+  A.fight=B.fight=f;A.state=B.state='fight';A.face=1;B.face=-1;
+  fights.push(f);changeHappy(A.t.id,-8);changeHappy(B.t.id,-8);sfx.fight();updateAlert();
+  const k=walkers.filter(w=>w.t.p==='kind'&&!w.fight&&w.state!=='held').sort((a,b)=>Math.hypot(a.x-mx,a.y-my)-Math.hypot(b.x-mx,b.y-my))[0];
+  if(k&&Math.hypot(k.x-mx,(k.y-my)*1.6)<40)later(()=>say(k,pick(['Stop fighting, you two!','Hey! Be nice to each other!','Somebody split them up!']),2600),900);
+}
+function stepFight(f,dt){
+  f.t+=dt;const{a,b}=f,t=f.t;
+  if(a.state!=='held'){a.x=f.ax+Math.sin(t*23)*.5;a.y=f.ay+Math.cos(t*17)*.3}
+  if(b.state!=='held'){b.x=f.bx+Math.sin(t*21+1)*.5;b.y=f.by+Math.cos(t*19)*.3}
+  f.el.style.left=(a.x+b.x)/2+'%';f.el.style.top=Math.min(a.y,b.y)+'%';f.el.style.zIndex=Math.round(Math.max(a.y,b.y)*10)+2;
+  if(dist(a,b)>17){endFight(f,true);return}
+  if(t>45){endFight(f,false);return}
+  if(Math.random()<dt*.6)say(Math.random()<.5?a:b,pick(FIGHTL),1300);
+}
+function endFight(f,byPlayer){
+  fights=fights.filter(x=>x!==f);f.el.remove();
+  const{a,b}=f;
+  [a,b].forEach(w=>{w.fight=null;if(w.state==='fight')busy(w,'sulk',rnd(3,4.5))});
+  later(()=>{say(a,SPLIT[a.t.p],2400);setMood(a,'sad',2600)},200);
+  later(()=>{say(b,SPLIT[b.t.p],2400);setMood(b,'sad',2600)},1300);
+  if(byPlayer){S.peace++;addCoins(2);sfx.coin();toast('Fight split up! +2 🪙')}
+  else toast(`${a.t.name} and ${b.t.name} got tired and stomped off.`);
+  if(effNice(a)>=-1&&effNice(b)>=-1&&Math.random()<.45){
+    later(()=>{if(a.fight||b.fight)return;say(a,fill('Sorry, {B}.',{B:b.t.name}),2200);setMood(a,'happy',2400)},4200);
+    later(()=>{if(a.fight||b.fight)return;say(b,'...Sorry too. Friends?',2200);setMood(b,'happy',2400);changeHappy(a.t.id,4);changeHappy(b.t.id,4);burst(b,'💛',3)},5700);
+  }
+  updateAlert();saveSoon();
+}
+function updateAlert(){
+  const al=$('#alert');
+  if(!fights.length){al.hidden=true;return}
+  const f=fights[0];
+  al.textContent=`💢 ${f.a.t.name} and ${f.b.t.name} are fighting! Press and hold one of them, then drag them apart.`;
+  al.hidden=false;
+}
+
+/* --- picking things up --- */
+let drag=null,suppressClick=false;
+const stageEl=$('#stage');
+stageEl.addEventListener('pointerdown',e=>{
+  const el=e.target.closest('.wander,.pitem');
+  if(!el||(e.pointerType==='mouse'&&e.button!==0))return;
+  drag={el,w:el._w||null,p:el._p||null,sx:e.clientX,sy:e.clientY,px:e.clientX,py:e.clientY,id:e.pointerId,active:false};
+  drag.hold=setTimeout(beginDrag,260);
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+});
+stageEl.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  drag.px=e.clientX;drag.py=e.clientY;
+  if(!drag.active){if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>7)beginDrag();else return}
+  moveDrag();
+});
+function endPointer(e){
+  if(!drag||e.pointerId!==drag.id)return;
+  clearTimeout(drag.hold);
+  if(drag.active)dropDrag();
+  drag=null;setTimeout(()=>{suppressClick=false},80);
+}
+stageEl.addEventListener('pointerup',endPointer);
+stageEl.addEventListener('pointercancel',endPointer);
+$('#scene').addEventListener('contextmenu',e=>e.preventDefault());
+function beginDrag(){
+  if(!drag||drag.active)return;
+  drag.active=true;suppressClick=true;
+  if(drag.w){
+    const w=drag.w;release(w);w.state='held';sfx.lift();
+    say(w,pick(HELD[w.t.p]),1800);
+    if(!w.fight)setMood(w,['playful','cheeky','kind'].includes(w.t.p)?'happy':PERS[w.t.p].nice<0?'angry':'norm',2000);
+  }else{
+    const p=drag.p;p.el.classList.add('dragging');if(p.user)kick(p.user);sfx.lift();
+  }
+  moveDrag();
+}
+function moveDrag(){
+  const r=stageEl.getBoundingClientRect();
+  const x=(drag.px-r.left)/r.width*100,y=(drag.py-r.top)/r.height*100;
+  if(drag.w){const w=drag.w;w.x=clamp(x,3,97);w.y=clamp(y+5,BY0-3,98)}
+  else{const p=drag.p;p.rec.x=clamp(x,4,96);p.rec.y=clamp(y+4,BY0-3,97);placeItem(p);p.el.style.zIndex=5001}
+}
+function dropDrag(){
+  if(drag.w){
+    const w=drag.w;sfx.drop();
+    if(w.fight){w.state='fight';const f=w.fight;if(f.a===w){f.ax=w.x;f.ay=w.y}else{f.bx=w.x;f.by=w.y}return}
+    w.state='idle';w.timer=rnd(1,2.5);
+    const near=pitems.filter(p=>!p.user&&distP(w,p)<8).sort((a,b)=>distP(w,a)-distP(w,b))[0];
+    if(near&&near.it.cat==='toy')playToy(w,near);
+    else if(near&&near.it.rest){near.user=w;w.seat=near;busy(w,'rest',rnd(6,10));say(w,fill(pick(RESTL),{furn:near.it.name.toLowerCase()}),2200)}
+    else if(Math.random()<.6)say(w,DROPL[w.t.p],1800);
+  }else{
+    const p=drag.p;p.el.classList.remove('dragging');placeItem(p);saveSoon();
+  }
+}
+function itemMenu(p){
+  openModal(`<div class="bigemoji">${p.it.emoji}</div><h2>${p.it.name}</h2><p>${p.it.d}</p><p class="muted">Drag it to move it around the pen.</p>
+    <div class="row center"><button class="btn alt" id="keepIt">Keep it here</button><button class="btn" id="storeIt">Put in storage</button></div>`);
+  $('#keepIt').onclick=closeModal;
+  $('#storeIt').onclick=()=>{storeItem(p);closeModal()};
+}
+function storeItem(p){
+  if(p.user)kick(p.user);
+  S.placed=S.placed.filter(r=>r!==p.rec);p.el.remove();pitems=pitems.filter(x=>x!==p);
+  save();toast(`${p.it.name} is in storage. Put it back from the shop.`);
+}
+function putInPen(id){
+  const rec={u:'p'+(++S.pu),id,x:rnd(10,90),y:rnd(BY0+4,BY1-3)};
+  S.placed.push(rec);
+  if(current==='home'){const p=makeItemEl(rec);if(p)pitems.push(p)}
+}
+
+/* ================= TURTLE CARD ================= */
+let cardId=null;
+function openTurtle(id,msg){cardId=id;renderCard(msg)}
+function renderCard(msg){
+  const id=cardId,t=BYID[id];if(!t)return;
+  const pe=PERS[t.p],h=hap(id),o=S.outfits[id]||{};
+  const n=Math.round(Math.sqrt(t.fav));
+  let wardrobe='';
+  SLOTS.forEach(sl=>{
+    const own=ITEMS.filter(i=>i.cat===sl.id&&S.inv[i.id]);if(!own.length)return;
+    wardrobe+=`<div class="slot"><b>${sl.label}</b><div class="chips">${[{id:'',name:'None'}].concat(own).map(i=>`<button class="wchip ${(o[sl.id]||'')===i.id?'on':''}" data-slot="${sl.id}" data-item="${i.id}">${i.name}</button>`).join('')}</div></div>`;
+  });
+  const treats=ITEMS.filter(i=>i.cat==='treat'&&S.inv[i.id]>0).map(i=>`<button class="wchip" data-treat="${i.id}">${i.emoji} ${i.name} × ${S.inv[i.id]}</button>`).join('');
+  const sc=$('#modalBody').scrollTop;
+  const wasOpen=!$('#modal').hidden;
+  openModal(`<div class="tc-top"><div class="big-t" data-mood="${msg?'happy':h<25?'sad':'norm'}">${turtleSVG(t)}</div>
+    <div><h2>${t.name}</h2><div class="tags"><span class="tag2">${pe.icon} ${pe.label}</span><span class="tag2">${SPECIES[t.species].label}</span></div>
+    <div class="mood">Mood: <b>${moodWord(h)}</b> <span class="hearts" aria-label="${Math.round(h/20)} of 5 hearts">${heartStr(h)}</span></div>
+    ${msg?`<div class="cardsay">“${msg}”</div>`:''}</div></div>
+    <p>${t.bio}</p><p class="ptip">${pe.tip}</p>
+    <div class="fav"><b>Favourite square: ${n}² = ${t.fav}</b><br>“${t.quote}”</div>
+    <h3 class="tc-sec">Dress up</h3>${wardrobe||'<p class="muted" style="margin:4px 0">No outfits yet. Earn coins on rescue missions, then visit the Shell Shop.</p>'}
+    <h3 class="tc-sec">Give a treat</h3>${treats?`<div class="chips">${treats}</div>`:'<p class="muted" style="margin:4px 0">No treats yet. You can buy them in the Shell Shop.</p>'}
+    <div class="row end" style="margin-top:14px"><button class="btn alt" data-go="shop">Shell Shop</button><button class="btn" id="cardDone">Done</button></div>`,true);
+  if(wasOpen)$('#modalBody').scrollTop=sc;
+  $('#cardDone').onclick=closeModal;
+  if(!wasOpen)$('#cardDone').focus({preventScroll:true});
+  $('#modalBody').querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{
+    const sl=b.dataset.slot,it=b.dataset.item;const oo=S.outfits[id]||(S.outfits[id]={});
+    if(it)oo[sl]=it;else delete oo[sl];
+    let line=null;
+    if(it){const k=id+':'+it;if(!S.worn[k]){S.worn[k]=1;changeHappy(id,6);line=pick(['Ooh, I love it!','How do I look?','So stylish!','Fancy!'])}}
+    sfx.pop();save();refreshWalker(id);renderCard(line);
+  });
+  $('#modalBody').querySelectorAll('[data-treat]').forEach(b=>b.onclick=()=>{
+    const it=b.dataset.treat;if(!(S.inv[it]>0))return;
+    S.inv[it]--;changeHappy(id,15);sfx.ok();save();
+    const line=pick(TREATL[t.p]);
+    const w=walkers.find(x=>x.t.id===id);if(w&&current==='home'){say(w,line,2600);setMood(w,'happy',3000);burst(w,'💖',4)}
+    renderCard(line);
+  });
+}
+
+/* ================= SHOP ================= */
+let shopTab='outfits';
+const TABS=[['outfits','👒 Outfits'],['toy','🧸 Toys'],['furn','🛋️ Furniture'],['treat','🍪 Treats'],['storage','📦 Storage']];
+function renderShop(){
+  const tb=$('#shopTabs');
+  tb.innerHTML=TABS.map(([k,l])=>`<button class="tab ${shopTab===k?'on':''}" data-tab="${k}" role="tab" aria-selected="${shopTab===k}">${l}</button>`).join('');
+  tb.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{sfx.tap();shopTab=b.dataset.tab;renderShop()});
+  let h='';
+  if(shopTab==='outfits'){
+    h='<p class="sub">Buy an outfit once and every turtle can wear it. Tap a turtle in the pen to dress them up. Turtles get happier the first time they wear something new.</p>';
+    SLOTS.forEach(sl=>{h+=`<h3 class="shop-h">${sl.label}</h3><div class="shopgrid">${ITEMS.filter(i=>i.cat===sl.id).map(itemCard).join('')}</div>`});
+  }else if(shopTab==='storage'){
+    const rows=ITEMS.filter(i=>(i.cat==='toy'||i.cat==='furn')&&S.inv[i.id]).map(i=>{
+      const inPen=placedCount(i.id),stored=S.inv[i.id]-inPen;
+      return `<div class="storerow"><span class="em">${i.emoji}</span><span class="nm"><b>${i.name}</b><br><small class="muted">${inPen} in the pen · ${stored} in storage</small></span>
+        ${stored>0?`<button class="btn" data-out="${i.id}">Put in pen</button>`:''}${inPen>0?`<button class="btn alt" data-away="${i.id}">Put one away</button>`:''}</div>`}).join('');
+    h=`<p class="sub">Toys and furniture you own. You can also tap anything in the pen to put it away.</p>`+(rows?`<div class="storelist">${rows}</div>`:'<p class="muted">Nothing here yet. Toys and furniture you buy will show up here.</p>');
+  }else{
+    const intro={toy:'Toys go straight into the pen. Turtles find them and play. Mean turtles might snatch them.',furn:'Furniture makes the pen cosy. Turtles nap on chairs, couches, beds and under umbrellas.',treat:'Give treats from a turtle’s card. Treats make turtles much happier, and happy turtles are nicer to each other.'}[shopTab];
+    h=`<p class="sub">${intro}</p><div class="shopgrid">${ITEMS.filter(i=>i.cat===shopTab).map(itemCard).join('')}</div>`;
+  }
+  const box=$('#shopBody');box.innerHTML=h;
+  box.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));
+  box.querySelectorAll('[data-out]').forEach(b=>b.onclick=()=>{sfx.pop();putInPen(b.dataset.out);save();renderShop();toast(`${ITEM[b.dataset.out].name} is back in the pen.`)});
+  box.querySelectorAll('[data-away]').forEach(b=>b.onclick=()=>{const id=b.dataset.away;const i=S.placed.map(r=>r.id).lastIndexOf(id);if(i>=0)S.placed.splice(i,1);sfx.pop();save();renderShop()});
+}
+function itemCard(i){
+  const outfit=isOutfit(i),own=S.inv[i.id]||0;
+  const pic=outfit?`<div class="ipic t">${turtleSVG(MODEL,{outfit:{[i.cat]:i.id}})}</div>`:`<div class="ipic e" aria-hidden="true">${i.emoji}</div>`;
+  const meta=!outfit&&own?`<small class="meta">You have ${own}</small>`:'';
+  let btn;
+  if(outfit&&own)btn=`<button class="buy owned" disabled>Owned ✓</button>`;
+  else if(S.coins>=i.price)btn=`<button class="buy" data-buy="${i.id}" aria-label="Buy ${i.name} for ${i.price} coins">🪙 ${i.price}</button>`;
+  else btn=`<button class="buy" disabled>🪙 ${i.price}</button><small class="need">Need ${i.price-S.coins} more</small>`;
+  return `<div class="icard">${pic}<b>${i.name}</b><small>${i.d}</small>${meta}${btn}</div>`;
+}
+function buy(id){
+  const i=ITEM[id];if(!i||S.coins<i.price)return;
+  if(isOutfit(i)&&S.inv[id])return;
+  S.coins-=i.price;S.inv[id]=(S.inv[id]||0)+1;
+  if(i.cat==='toy'||i.cat==='furn')putInPen(id);
+  sfx.coin();save();updatePills();renderShop();
+  toast(i.cat==='toy'||i.cat==='furn'?`${i.name} added to the pen!`:isOutfit(i)?`${i.name} bought! Tap a turtle to try it on.`:`${i.name} bought! Give it from a turtle’s card.`);
+}
+
+/* ================= MISSIONS ================= */
+function unlocked(L){const i=LEVELS.indexOf(L);return i===0||(S.stars[LEVELS[i-1].id]||0)>=1}
+const starStr=(n,max=3)=>'★'.repeat(n)+'☆'.repeat(max-n);
+function renderLevels(){
+  const box=$('#levels');box.innerHTML='';
+  LEVELS.forEach(L=>{
+    const b=document.createElement('button');b.className='level';
+    const open=unlocked(L);b.disabled=!open;
+    b.style.background=L.color;b.style.color=L.ink;
+    const pz=prizesOf(L).map((t,i)=>{const got=S.owned.includes(t.id);return `<span class="pz" title="${got?t.name:'Win '+(i+1)+' star'+(i?'s':'')+' to rescue'}"><span class="pzt">${turtleSVG(t,{silhouette:!got})}</span><small>${'★'.repeat(i+1)}</small></span>`}).join('');
+    b.innerHTML=`<span class="num">${open?L.id:'🔒'}</span><span><b>${L.name}</b><small>${open?L.desc:'Get 1 star on the mission before this one to unlock.'}</small></span>
+      <span class="lv-foot"><span class="prizes">${pz}</span><span class="stars" aria-label="${S.stars[L.id]||0} of 3 stars">${starStr(S.stars[L.id]||0)}</span></span>`;
+    b.addEventListener('click',()=>{sfx.tap();openIntro(L)});
+    box.appendChild(b);
+  });
+}
+let L=null;
+function openIntro(level){
+  L=level;go('intro');
+  $('#introTitle').textContent=L.name;
+  $('#introDesc').innerHTML=`<b>Mission ${L.id}.</b> ${L.desc}`;
+  $('#introTip').innerHTML=`💡 ${L.tip}`;
+  $('#introPrizes').innerHTML=prizesOf(L).map((t,i)=>{const got=S.owned.includes(t.id);
+    return `<div class="prizecard"><div class="pic">${turtleSVG(t,{silhouette:!got})}</div><div class="st">${'★'.repeat(i+1)}</div><b>${t.name}</b><small>${got?'Already home':'Waiting to be rescued'}</small></div>`}).join('');
+  $('#introRules').innerHTML=`<li>📝 ${L.q} questions. There’s no time limit.</li><li>⚡ Answer within ${L.bonus} seconds for a +5 speed bonus.</li><li>⭐ 45% of the points for one star, 65% for two, 85% for three. Getting every answer right earns two stars. Three stars need speed bonuses too.</li>`;
+}
+$('#startBtn').addEventListener('click',()=>{sfx.tap();startMission()});
+
+/* ================= QUESTIONS ================= */
+function weightedPick(nums){
+  const w=nums.map(n=>1+Math.min(3,S.misses[n]||0));let r=Math.random()*w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<nums.length;i++){r-=w[i];if(r<=0)return nums[i]}return nums[nums.length-1];
+}
+function pickType(types){const e=Object.entries(types);let r=Math.random()*e.reduce((a,[,v])=>a+v,0);for(const[k,v]of e){r-=v;if(r<=0)return k}return e[0][0]}
+function genQ(level){
+  const type=pickType(level.types);const q={type};
+  const mn=level.mnums||R(3,12);
+  switch(type){
+    case 'sq':{const n=weightedPick(level.nums);Object.assign(q,{n,answer:n*n,key:n});break}
+    case 'root':{const n=weightedPick(level.nums);Object.assign(q,{n,answer:n,key:n});break}
+    case 'diff':{const n=Math.max(2,weightedPick(level.nums));Object.assign(q,{n,answer:2*n-1,key:n});break}
+    case 'isSq':{const n=weightedPick(level.nums);q.n=n;
+      if(Math.random()<.45){q.value=n*n;q.answer='Yes'}
+      else{let v,k=0;do{v=n*n+(Math.random()<.5?-1:1)*(1+Math.floor(Math.random()*Math.max(3,n)));k++}while((v<2||isSquare(v))&&k<30);if(isSquare(v))v=n*n+1;q.value=v;q.answer='No'}
+      q.key=Math.max(1,Math.round(Math.sqrt(q.value)));break}
+    case 'near':{const n=weightedPick(mn),d=Math.random()<.5?-1:1,m=n+d,sw=Math.random()<.5;Object.assign(q,{n,d,a:sw?m:n,b:sw?n:m,answer:n*m,key:n});break}
+    case 'sandwich':{const n=weightedPick(level.snums||R(3,13));Object.assign(q,{n,a:n-1,b:n+1,answer:n*n-1,key:n});break}
+    case 'dbl':{const n=rint(2,9);Object.assign(q,{n,a:n,b:2*n,answer:2*n*n,key:n});break}
+    case 'times':{let a,b;do{a=rint(2,12);b=rint(2,12)}while(a===b);Object.assign(q,{a,b,answer:a*b,key:'x'+Math.min(a,b)+'-'+Math.max(a,b)});break}
+    case 'missing':{let a,b;do{a=rint(2,12);b=rint(2,12)}while(a===b);Object.assign(q,{a,b,answer:a,key:'x'+Math.min(a,b)+'-'+Math.max(a,b)});break}
+  }
+  q.sig=[type,q.n,q.a,q.b,q.value].join(':');
+  return q;
+}
+function makeQ(level,prev){
+  let q,tries=0;
+  do{q=genQ(level);tries++}while(prev&&q.sig===prev.sig&&tries<12);
+  q.mode=q.type==='isSq'?'mc':level.mode==='mixed'?(Math.random()<.5?'mc':'type'):level.mode;
+  if(q.mode==='mc')q.options=makeOptions(q);
+  return q;
+}
+function makeOptions(q){
+  if(q.type==='isSq')return['Yes','No'];
+  const a=q.answer,n=q.n;let c=[];
+  switch(q.type){
+    case 'sq':{const s=String(a);const sw=s.length===3?Number(s[0]+s[2]+s[1]):0;c=[(n-1)**2,(n+1)**2,2*n,n*(n+1),a+10,a-10,sw,n*(n-1)];break}
+    case 'root':c=[n-1,n+1,n+2,n-2,n+3,2*n];break;
+    case 'diff':c=[2*n,2*n+1,2*n-3,1,n,2*n-2];break;
+    case 'near':c=[n*n,n*(n-q.d),a+1,a-1,a+10,a-10,a+2*q.d];break;
+    case 'sandwich':c=[n*n,n*n+1,n*n-2,n*n-n,a+10,a-10];break;
+    case 'dbl':c=[n*n,n*n*4,a+2,a-2,a+10,a-10,n*n+2*n];break;
+    case 'times':c=[(q.a+1)*q.b,(q.a-1)*q.b,q.a*(q.b+1),q.a*(q.b-1),a+10,a-10,q.a+q.b];break;
+    case 'missing':c=[q.a+1,q.a-1,q.a+2,q.a-2,q.b];break;
+  }
+  c=shuffle(c.filter(x=>Number.isInteger(x)&&x>0&&x!==a));
+  const set=new Set();for(const x of c){if(set.size>=3)break;set.add(x)}
+  let k=1;while(set.size<3){const x=a+k;if(x!==a&&x>0)set.add(x);k++}
+  return shuffle([a,...set]);
+}
+function qView(q){
+  const N=q.n*q.n;
+  switch(q.type){
+    case 'sq':return{txt:`${q.n}<sup>2</sup> = ?`};
+    case 'root':return{txt:`?<sup>2</sup> = ${N}`,help:`Which number times itself makes ${N}?`};
+    case 'diff':return{txt:`${q.n}<sup>2</sup> − ${q.n-1}<sup>2</sup>`,help:'Neighbour squares: what is the difference?'};
+    case 'isSq':return{txt:`Is ${q.value} a square?`,help:'Is it some number times itself?',cls:'small'};
+    case 'near':return{txt:`${q.a} × ${q.b} = ?`,cls:'mid',clue:`🐢 Clue: ${q.n} × ${q.n} = ${N}`,help:'Use the square to help you.'};
+    case 'sandwich':return{txt:`${q.a} × ${q.b} = ?`,cls:'mid',clue:`🐢 Clue: ${q.n} × ${q.n} = ${N}`,help:'The number in the middle can help.'};
+    case 'dbl':return{txt:`${q.a} × ${q.b} = ?`,cls:'mid',clue:`🐢 Clue: ${q.n} × ${q.n} = ${N}`,help:'Look closely at the second number.'};
+    case 'times':return{txt:`${q.a} × ${q.b} = ?`,cls:'mid'};
+    case 'missing':return{txt:`? × ${q.b} = ${q.a*q.b}`,cls:'mid',help:'What number goes where the ? is?'};
+  }
+}
+function explain(q){
+  const n=q.n,N=n*n;
+  switch(q.type){
+    case 'isSq':{const r=Math.floor(Math.sqrt(q.value));
+      if(q.answer==='Yes')return `Yes! ${r} × ${r} = ${q.value}. ${TIPS[r]||''}`;
+      return `No. ${q.value} sits between ${r*r} (${r}²) and ${(r+1)*(r+1)} (${r+1}²).`+(/[2378]$/.test(String(q.value))?' Clue: squares never end in 2, 3, 7 or 8.':'')}
+    case 'diff':return `${n}² − ${n-1}² = ${n} + ${n-1} = ${q.answer}. Neighbour squares always differ by the two numbers added together.`;
+    case 'root':return `${n} × ${n} = ${N}. ${TIPS[n]}`;
+    case 'sq':return TIPS[n];
+    case 'near':return q.d<0?`${n} × ${n} = ${N}. ${n-1} × ${n} is one fewer lot of ${n}: ${N} − ${n} = ${q.answer}.`:`${n} × ${n} = ${N}. ${n+1} × ${n} is one more lot of ${n}: ${N} + ${n} = ${q.answer}.`;
+    case 'sandwich':return `Sandwich trick: ${n-1} and ${n+1} sit either side of ${n}. So ${n-1} × ${n+1} = ${n}² − 1 = ${N} − 1 = ${q.answer}.`;
+    case 'dbl':return `${2*n} is double ${n}, so ${n} × ${2*n} is double ${n} × ${n}: 2 × ${N} = ${q.answer}.`;
+    case 'times':{const x=q.a,y=q.b,m=Math.min(x,y);
+      if(Math.abs(x-y)===1)return `${m} × ${m} = ${m*m}, and one more ${m} makes ${m*m} + ${m} = ${q.answer}. So ${x} × ${y} = ${q.answer}.`;
+      if(Math.abs(x-y)===2)return `Sandwich trick: ${x} and ${y} sit either side of ${m+1}. ${m+1}² − 1 = ${(m+1)*(m+1)} − 1 = ${q.answer}.`;
+      if(y===10)return `${x} × 10 = ${10*x}. Just put a zero on the end.`;
+      if(y<10)return `${x} × ${y} = ${x} × 10 − ${x} × ${10-y} = ${10*x} − ${x*(10-y)} = ${q.answer}.`;
+      return `${x} × ${y} = ${x} × 10 + ${x} × ${y-10} = ${10*x} + ${x*(y-10)} = ${q.answer}.`}
+    case 'missing':return `${q.a*q.b} ÷ ${q.b} = ${q.a}, because ${q.a} × ${q.b} = ${q.a*q.b}.`;
+  }
+}
+
+/* ================= GAME ================= */
+let G=null,bonusRaf=null;
+function startMission(){
+  G={qs:[],i:0,score:0,max:L.q*15,correct:0,speedy:0,streak:0,best:0,missed:[],reached:0,prize:prizesOf(L),input:'',accepting:false,start:0,pauseAt:0};
+  let prev=null;for(let i=0;i<L.q;i++){prev=makeQ(L,prev);G.qs.push(prev)}
+  const m=$('#meter');m.querySelectorAll('.mark').forEach(x=>x.remove());
+  STAR.forEach((t,i)=>{const d=document.createElement('span');d.className='mark';d.style.left=(t*100)+'%';d.textContent='⭐';d.id='mark'+i;d.title=`${i+1} star${i?'s':''}`;m.appendChild(d)});
+  $('#meterFill').style.width='0%';$('#combo').classList.remove('on');
+  go('game');showTrapped();renderQ();
+}
+function showTrapped(){
+  const tr=$('#trapped');const t=G.prize[G.reached];
+  if(!t){tr.innerHTML='';tr.className='trapped';$('#trapTag').textContent='All three stars! Keep going for coins.';return}
+  tr.className='trapped';
+  let net='<svg class="net" viewBox="0 0 132 88" id="net" aria-hidden="true"><g stroke="#8A6A45" stroke-width="2.2" stroke-linecap="round" opacity=".95">';
+  for(let x=-90;x<140;x+=14)net+=`<line x1="${x}" y1="0" x2="${x+88}" y2="88"/><line x1="${x+88}" y1="0" x2="${x}" y2="88"/>`;
+  net+='</g></svg>';
+  tr.innerHTML=turtleSVG(t)+net;
+  const n=G.reached+1;
+  $('#trapTag').textContent=S.owned.includes(t.id)?`${'⭐'.repeat(n)} ${t.name} is already home. Win the star anyway!`:`Reach ${'⭐'.repeat(n)} to free ${t.name}!`;
+  updateNet();
+}
+const pct=()=>G.score/G.max;
+function updateNet(){
+  const net=$('#net');if(!net)return;
+  const prev=G.reached?STAR[G.reached-1]:0,next=STAR[G.reached];if(next===undefined)return;
+  const f=clamp((pct()-prev)/(next-prev),0,1);net.style.opacity=(1-f*.75).toFixed(2);
+}
+function renderQ(){
+  const q=G.q=G.qs[G.i];
+  $('#qCount').textContent=`${G.i+1} / ${L.q}`;
+  $('#scoreP').textContent=`${G.score} pts`;
+  const v=qView(q);
+  const qt=$('#qText');qt.innerHTML=v.txt;qt.className='qtext '+(v.cls||'');
+  $('#qClue').innerHTML=v.clue?`<span class="clue">${v.clue}</span>`:'';
+  $('#qHelp').textContent=v.help||'';
+  $('#fb').innerHTML='';
+  const z=$('#answerZone');G.input='';
+  if(q.mode==='mc'){
+    z.innerHTML=`<div class="answers">${q.options.map(o=>`<button class="opt" data-v="${o}">${o}</button>`).join('')}</div>`;
+    z.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>answer(b.dataset.v,b)));
+  }else{
+    z.innerHTML=`<div class="display" id="disp" aria-live="polite">&nbsp;</div><div class="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button data-d="${d}">${d}</button>`).join('')}<button data-d="del" aria-label="Delete">⌫</button><button data-d="0">0</button><button data-d="ok" class="go" aria-label="Send answer">✓</button></div>`;
+    z.querySelectorAll('.pad button').forEach(b=>b.addEventListener('click',()=>padPress(b.dataset.d)));
+  }
+  G.accepting=true;G.start=performance.now();startBonus();
+}
+function padPress(d){
+  if(!G||!G.accepting||G.q.mode!=='type')return;
+  if(d==='del')G.input=G.input.slice(0,-1);
+  else if(d==='ok'){if(G.input)answer(G.input);return}
+  else if(G.input.length<3)G.input+=d;
+  sfx.tap();$('#disp').innerHTML=G.input||'&nbsp;';
+}
+document.addEventListener('keydown',e=>{
+  if(current!=='game'||!G||!$('#modal').hidden)return;
+  if(!G.accepting){if(e.key==='Enter'&&$('#nextQ')){e.preventDefault();$('#nextQ').click()}return}
+  if(G.q.mode==='type'){
+    if(/^[0-9]$/.test(e.key))padPress(e.key);
+    else if(e.key==='Backspace')padPress('del');
+    else if(e.key==='Enter'){e.preventDefault();padPress('ok')}
+  }else{
+    const opts=[...document.querySelectorAll('.opt')];const i=Number(e.key)-1;
+    if(i>=0&&i<opts.length)opts[i].click();
+    if(G.q.type==='isSq'){const k=e.key.toLowerCase();if(k==='y')opts.find(o=>o.dataset.v==='Yes').click();if(k==='n')opts.find(o=>o.dataset.v==='No').click()}
+  }
+});
+function startBonus(){
+  stopBonus();const bar=$('#bonusFill'),box=$('#bonus'),lbl=$('#bonusLbl');
+  box.classList.remove('gone');lbl.textContent='⚡ Speed bonus +5';bar.style.width='100%';
+  const step=()=>{
+    if(!G||!G.accepting)return;
+    const f=Math.max(0,1-(performance.now()-G.start)/1000/L.bonus);
+    bar.style.width=(f*100)+'%';
+    if(f<=0){box.classList.add('gone');lbl.textContent='No rush. Take your time.';bonusRaf=null;return}
+    bonusRaf=requestAnimationFrame(step);
+  };bonusRaf=requestAnimationFrame(step);
+}
+function stopBonus(){if(bonusRaf)cancelAnimationFrame(bonusRaf);bonusRaf=null}
+function answer(val,btn){
+  if(!G.accepting)return;G.accepting=false;stopBonus();
+  const q=G.q;const el=(performance.now()-G.start)/1000;const fast=el<=L.bonus;
+  const ok=String(val)===String(q.answer);
+  if(q.mode==='mc')document.querySelectorAll('.opt').forEach(o=>{if(String(o.dataset.v)===String(q.answer))o.classList.add('right');else if(o===btn)o.classList.add('wrong');o.disabled=true});
+  else $('#disp').classList.add(ok?'right':'wrong');
+  if(ok){
+    const pts=10+(fast?5:0);
+    G.score+=pts;G.correct++;if(fast)G.speedy++;G.streak++;G.best=Math.max(G.best,G.streak);
+    if(S.misses[q.key])S.misses[q.key]=Math.max(0,S.misses[q.key]-1);
+    sfx.ok();floaty(fast?`+15 ⚡`:'+10',btn||$('#disp'),fast);
+    const c=$('#combo');c.textContent=`🔥 ${G.streak} in a row`;c.classList.toggle('on',G.streak>=3);
+    const tr=$('#trapped');tr.classList.remove('shake');void tr.offsetWidth;tr.classList.add('shake');
+    progress();
+    setTimeout(nextQ,G.justFreed?1300:750);
+  }else{
+    G.streak=0;$('#combo').classList.remove('on');
+    S.misses[q.key]=(S.misses[q.key]||0)+1;G.missed.push(q);
+    sfx.bad();
+    $('#fb').innerHTML=`<div class="feedback"><h3>Not quite. The answer is ${q.answer}.</h3><div>💡 ${explain(q)}</div><div class="row end" style="margin-top:10px"><button class="btn" id="nextQ">Next question</button></div></div>`;
+    $('#nextQ').addEventListener('click',nextQ);$('#nextQ').focus();
+  }
+  saveSoon();
+}
+function progress(){
+  $('#scoreP').textContent=`${G.score} pts`;
+  $('#meterFill').style.width=Math.min(100,pct()*100)+'%';
+  const r=STAR.filter(t=>pct()>=t).length;
+  G.justFreed=false;
+  if(r>G.reached){
+    for(let i=G.reached;i<r;i++)$('#mark'+i).classList.add('on');
+    const t=G.prize[G.reached];
+    G.reached=r;G.justFreed=true;sfx.free();
+    $('#trapTag').textContent=S.owned.includes(t.id)?`Star won! ⭐`:`${t.name} is free! Finish the mission to bring them home.`;
+    const net=$('#net');if(net)net.style.opacity='0';
+    setTimeout(()=>$('#trapped').classList.add('free'),350);
+    setTimeout(()=>{if(G)showTrapped()},1250);
+  }else updateNet();
+}
+function nextQ(){if(!G)return;G.i++;if(G.i>=L.q)endMission();else renderQ()}
+function floaty(txt,anchor,fast){
+  if(!anchor)return;const r=anchor.getBoundingClientRect();const f=document.createElement('div');
+  f.className='floaty'+(fast?' fast':'');f.textContent=txt;f.style.left=(r.left+r.width/2-24)+'px';f.style.top=(r.top-10)+'px';
+  document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
+}
+$('#quitBtn').addEventListener('click',()=>{
+  if(!G)return;const was=G.accepting;G.accepting=false;stopBonus();G.pauseAt=performance.now();
+  openModal(`<h2>Stop this mission?</h2><p>Any turtles you freed this time will swim off again. You can come back any time.</p><div class="row center"><button class="btn alt" id="keepGoing">Keep going</button><button class="btn" id="reallyQuit">Stop mission</button></div>`);
+  $('#keepGoing').onclick=()=>{closeModal();if(!G)return;G.start+=performance.now()-G.pauseAt;if(was){G.accepting=true;startBonus()}};
+  $('#reallyQuit').onclick=()=>{closeModal();G=null;go('missions')};
+});
+function endMission(){
+  stopBonus();
+  const p=pct();const stars=STAR.filter(t=>p>=t).length;
+  const before=S.stars[L.id]||0;S.stars[L.id]=Math.max(before,stars);
+  const newStars=Math.max(0,stars-before);
+  const newOnes=[];for(let i=0;i<stars;i++){const t=G.prize[i];if(t&&!S.owned.includes(t.id)){S.owned.push(t.id);newOnes.push(t)}}
+  const perfect=G.correct===L.q;
+  const lines=[[`${G.correct} right answers × 2`,G.correct*2],[`${G.speedy} speed bonuses`,G.speedy]];
+  if(newStars)lines.push([`${newStars} new star${newStars>1?'s':''} × 10`,newStars*10]);
+  if(perfect)lines.push(['Perfect mission',5]);
+  const coins=lines.reduce((a,[,v])=>a+v,0);
+  S.coins+=coins;
+  const idx=LEVELS.indexOf(L);const nextL=LEVELS[idx+1];
+  const newlyUnlocked=nextL&&before<1&&stars>=1;
+  save();
+  const heads=['The nets were too tricky this time','Nice rescue!','Brilliant rescue!','Legendary rescuer!'];
+  const seen=new Set();const review=G.missed.filter(q=>{if(seen.has(q.sig))return false;seen.add(q.sig);return true});
+  const still=G.prize.map((t,i)=>({t,i})).filter(({t})=>!S.owned.includes(t.id));
+  let html=`<h2 style="font-size:clamp(28px,6vw,40px);text-align:center">${heads[stars]}</h2>
+    <div class="bigstars" aria-label="${stars} stars">${starStr(stars)}</div>
+    <div class="statrow"><div class="stat"><b>${G.correct}/${L.q}</b><span>correct</span></div><div class="stat"><b>${G.speedy}</b><span>speed bonuses</span></div><div class="stat"><b>${G.best}</b><span>best streak</span></div></div>
+    <div class="coinbox"><h3>+${coins} 🪙 coins</h3><table>${lines.map(([l,v])=>`<tr><td>${l}</td><td>${v}</td></tr>`).join('')}</table><small class="muted">You now have ${S.coins} coins to spend in the Shell Shop.</small></div>`;
+  if(newOnes.length)html+=`<h3 style="font-size:26px;margin-top:6px">New friends at Pebble Lagoon</h3>`+newOnes.map(t=>`<div class="meet"><div>${turtleSVG(t)}</div><div><h3>${t.name}</h3><div class="muted" style="font-weight:800">${PERS[t.p].icon} ${PERS[t.p].label} · ${SPECIES[t.species].label}</div><div>${t.bio}</div></div></div>`).join('');
+  if(S.owned.length===TURTLES.length&&newOnes.length)html+=`<div class="tipbox" style="border-left-color:var(--good)">🎉 <b>Every turtle is home!</b> You rescued all ${TURTLES.length} turtles. Pebble Lagoon is full.</div>`;
+  if(still.length)html+=`<div class="tipbox">Still out at sea on this mission: ${still.map(({t,i})=>`<b>${t.name}</b> (${'★'.repeat(i+1)})`).join(', ')}.</div>`;
+  if(newlyUnlocked)html+=`<div class="tipbox" style="border-left-color:var(--good)">🔓 <b>${nextL.name}</b> is now open!</div>`;
+  else if(nextL&&!unlocked(nextL))html+=`<div class="tipbox">Get 1 star here to unlock <b>${nextL.name}</b>.</div>`;
+  if(review.length)html+=`<h3 style="font-size:22px;margin-top:10px">Worth practising</h3><ul class="review">${review.map(q=>`<li>${explain(q)}</li>`).join('')}</ul>`;
+  html+=`<div class="row end" style="margin-top:14px"><button class="btn alt" data-go="home">Visit the pen</button><button class="btn alt" id="again">Play again</button>${nextL&&unlocked(nextL)?`<button class="btn" id="nextM">Next: ${nextL.name}</button>`:''}</div>`;
+  $('#resultsBody').innerHTML=html;
+  go('results');
+  if(stars>=2)sfx.win();else sfx.coin();
+  if(newOnes.length)party();
+  $('#again').onclick=()=>{sfx.tap();startMission()};
+  if($('#nextM'))$('#nextM').onclick=()=>{sfx.tap();openIntro(nextL)};
+  G=null;
+}
+
+/* ================= BOOK ================= */
+function renderBook(){
+  const n=S.owned.length;
+  $('#bookSub').textContent=`You’ve rescued ${n} of ${TURTLES.length} turtles. Each mission has three to find, one for each star. Tap a turtle to dress them up.`;
+  const g=$('#bookGrid');g.innerHTML='';
+  TURTLES.forEach(t=>{
+    const got=S.owned.includes(t.id);
+    const c=document.createElement(got?'button':'div');c.className='card'+(got?'':' locked');
+    const where=t.lv?`Mission ${t.lv}: ${LEVELS[t.lv-1].name} · ${'★'.repeat(t.star)}`:'Your first friend';
+    c.innerHTML=got?`<div data-mood="${hap(t.id)<25?'sad':'norm'}">${turtleSVG(t)}</div><h3>${t.name}</h3><small>${PERS[t.p].icon} ${PERS[t.p].label}</small>`
+      :`${turtleSVG(t,{silhouette:true,question:true})}<h3>???</h3><small>${where}</small>`;
+    if(got)c.addEventListener('click',()=>{sfx.tap();openTurtle(t.id)});
+    g.appendChild(c);
+  });
+}
+
+/* ================= ACADEMY ================= */
+const LESSONS=[
+ {id:'what',icon:'🥚',title:'What is a square number?',short:'A number times itself',
+  body:()=>`<p>A square number is what you get when you multiply a number by itself. We write it with a little 2: <b>4² means 4 × 4 = 16</b>.</p><p>They’re called squares because you can arrange that many turtle eggs into a perfect square. Slide to see.</p>
+   <input type="range" min="1" max="15" value="4" id="eggR" aria-label="Choose a number"><p class="bigline" id="eggL"></p><div class="eggs" id="eggs"></div>`,
+  init(){const r=$('#eggR');const draw=()=>{const n=+r.value;$('#eggL').textContent=`${n} × ${n} = ${n*n}`;const e=$('#eggs');e.style.gridTemplateColumns=`repeat(${n},1fr)`;e.innerHTML='<i></i>'.repeat(n*n)};r.oninput=draw;draw()},
+  check:{q:'What is 9²?',opts:[18,81,99,72],a:81,why:'9² = 9 × 9 = 81. (18 is 9 + 9, a common trap!)'}},
+ {id:'odd',icon:'🪜',title:'The odd-number staircase',short:'Add the next odd number',
+  body:()=>`<p>To get from one square to the next, add the next <b>odd number</b>. 1, then add 3, then 5, then 7…</p><div class="chips">${(()=>{let s='';for(let n=1;n<=15;n++){if(n>1)s+=`<span class="plus">+${2*n-1}</span>`;s+=`<span class="chip">${n*n}</span>`}return s})()}</div><p>So if you forget 8², start from 7² = 49 and add 15 (that’s 7 + 8). 49 + 15 = 64.</p>`,
+  check:{q:'7² = 49. What is 8²? (Add 7 + 8.)',opts:[64,56,63,60],a:64,why:'49 + 15 = 64.'}},
+ {id:'five',icon:'✋',title:'The five trick',short:'For numbers ending in 5',
+  body:()=>`<p>Squaring a number that ends in 5? Easy.</p><p><b>1.</b> Take the digit before the 5 and multiply it by the next number up.<br><b>2.</b> Put 25 on the end.</p><div class="tipbox">15²: the digit before 5 is 1. 1 × 2 = 2. Add 25 → <b>225</b>.<br>5²: nothing before the 5, so 0 × 1 = 0. Add 25 → <b>25</b>.</div><p>Bonus: it works for 25² too. 2 × 3 = 6, add 25 → 625!</p>`,
+  check:{q:'Use the five trick: 15² = ?',opts:[225,215,150,255],a:225,why:'1 × 2 = 2, then 25 on the end: 225.'}},
+ {id:'ten',icon:'🔟',title:'The ten trick (11 to 15)',short:'100 + a bit + a bit more',
+  body:()=>`<p>Split a teen number into 10 and a bit. For 13, that’s 10 and 3. The square breaks into four pieces:</p><p><b>100</b> + <b>two lots of 10 × 3</b> + <b>3²</b> = 100 + 60 + 9 = <b>169</b>.</p><input type="range" min="1" max="5" value="3" id="tenR" aria-label="Choose the bit after ten"><p class="bigline" id="tenL"></p><div class="area" id="area"></div>`,
+  init(){const r=$('#tenR');const draw=()=>{const a=+r.value;const n=10+a;$('#tenL').textContent=`${n}² = 100 + ${20*a} + ${a*a} = ${n*n}`;const g=$('#area');g.style.gridTemplateColumns=`10fr ${a}fr`;g.style.gridTemplateRows=`10fr ${a}fr`;g.innerHTML=`<div style="background:#7FE0D2">100</div><div style="background:#FFD66B">${10*a}</div><div style="background:#FFD66B">${10*a}</div><div style="background:#FF9DB0">${a*a}</div>`};r.oninput=draw;draw()},
+  check:{q:'Use the ten trick: 12² = ?',opts:[144,124,142,164],a:144,why:'100 + 40 + 4 = 144.'}},
+ {id:'double',icon:'✖️',title:'The doubling trick',short:'Even numbers: 4 × a smaller square',
+  body:()=>`<p>For an even number, halve it, square the half, then multiply by 4.</p><div class="tblwrap"><table class="tbl"><tr><th>Square</th><th>Halve it</th><th>Times 4</th></tr>${[4,6,8,12,14].map(n=>`<tr><td>${n}²</td><td>${n/2}² = ${(n/2)**2}</td><td>4 × ${(n/2)**2} = ${n*n}</td></tr>`).join('')}</table></div><p>This is brilliant for <b>14²</b>: 7² is 49, and 4 × 49 = 196.</p>`,
+  check:{q:'7² = 49, so 14² = 4 × 49 = ?',opts:[196,186,98,169],a:196,why:'4 × 49 = 196. (Double 49 is 98, double again is 196.)'}},
+ {id:'rhyme',icon:'🎵',title:'Rhymes and twins',short:'Silly sayings that stick',
+  body:()=>`<p>Say these out loud a few times. The sillier the better!</p><ul><li><b>6² = 36</b>: “Six by six is thirty-six, the turtle does some fancy tricks.”</li><li><b>7² = 49</b>: “Seven sevens, forty-nine, the turtle’s feeling fine.”</li><li><b>8² = 64</b>: “Eight times eight is sixty-four, the turtle’s snoring on the shore.”</li><li><b>11² = 121</b>: reads the same forwards and backwards.</li><li><b>12² = 144</b>: a dozen dozens, called “a gross”.</li><li><b>13² = 169</b> and <b>14² = 196</b>: twins! Same digits, last two swapped. The smaller number gets the smaller answer.</li></ul>`,
+  check:{q:'“Eight times eight is ___, the turtle’s snoring on the shore.”',opts:[64,56,72,48],a:64,why:'Sixty-four rhymes with shore. 8 × 8 = 64.'}},
+ {id:'digit',icon:'🔍',title:'Last-digit detective',short:'Spot fake squares instantly',
+  body:()=>`<p>Look at the last digit of every square from 1² to 15²:</p><div class="chips">${R(1,15).map(i=>`<span class="chip">${i*i}</span>`).join('')}</div><p>They only ever end in <b>0, 1, 4, 5, 6 or 9</b>. So if a number ends in <b>2, 3, 7 or 8</b>, it can’t be a square.</p><p>For other numbers, check which squares they sit between. 150 is between 144 (12²) and 169 (13²), so it isn’t a square.</p>`,
+  check:{q:'Which of these can’t be a square number?',opts:[147,144,196,121],a:147,why:'147 ends in 7, and squares never end in 7.'}},
+ {id:'neigh',icon:'👯',title:'Neighbour squares',short:'The gap between next-door squares',
+  body:()=>`<p>What’s the difference between two squares that sit next to each other? Just add the two numbers!</p><input type="range" min="2" max="15" value="13" id="nR" aria-label="Choose a number"><p class="bigline" id="nL"></p><p>That’s why the odd-number staircase works: each step up is the two numbers added together.</p>`,
+  init(){const r=$('#nR');const draw=()=>{const n=+r.value;$('#nL').textContent=`${n}² − ${n-1}² = ${n*n} − ${(n-1)**2} = ${2*n-1}, and ${n} + ${n-1} = ${2*n-1}`};r.oninput=draw;draw()},
+  check:{q:'14² − 13² = ?',opts:[27,1,25,28],a:27,why:'14 + 13 = 27. (196 − 169 = 27.)'}},
+ {id:'near',icon:'👣',title:'One step from a square',short:'Squares help you multiply',
+  body:()=>`<p>Know a square? Then you know the times tables right next to it too.</p><p><b>9 × 9 = 81.</b> So <b>9 × 10</b> is one more 9: 81 + 9 = 90. And <b>8 × 9</b> is one fewer 9: 81 − 9 = 72.</p><input type="range" min="3" max="12" value="7" id="nearR" aria-label="Choose a number"><p class="bigline" id="nearL"></p><div class="eggs" id="nearE"></div><p>The pink column is the extra lot you add on. Take it away instead to go one step down.</p>`,
+  init(){const r=$('#nearR');const draw=()=>{const n=+r.value;$('#nearL').innerHTML=`${n} × ${n} = ${n*n}<br>${n} × ${n+1} = ${n*n} + ${n} = ${n*(n+1)}<br>${n-1} × ${n} = ${n*n} − ${n} = ${n*(n-1)}`;const e=$('#nearE');e.style.gridTemplateColumns=`repeat(${n+1},1fr)`;let h='';for(let i=0;i<n;i++)for(let j=0;j<=n;j++)h+=j===n?'<i class="extra"></i>':'<i></i>';e.innerHTML=h};r.oninput=draw;draw()},
+  check:{q:'8 × 8 = 64. What is 8 × 9?',opts:[72,63,56,81],a:72,why:'One more 8: 64 + 8 = 72.'}},
+ {id:'sandwich',icon:'🥪',title:'The sandwich trick',short:'Numbers either side of a square',
+  body:()=>`<p>When two numbers sit either side of the same number, like 11 and 13 around 12, square the middle number and take away 1.</p><div class="tblwrap"><table class="tbl"><tr><th>Sandwich</th><th>Middle squared</th><th>Take away 1</th></tr>${[5,8,10,12,15].map(n=>`<tr><td>${n-1} × ${n+1}</td><td>${n}² = ${n*n}</td><td>${n*n-1}</td></tr>`).join('')}</table></div><p>Try it: 9 × 11 has 10 in the middle. 10² = 100, so 9 × 11 = 99.</p>`,
+  check:{q:'12 × 12 = 144. What is 11 × 13?',opts:[143,144,145,132],a:143,why:'12 is in the middle. 144 − 1 = 143.'}}
+];
+function renderAcademy(){
+  const done=S.learned.length;
+  $('#academySub').textContent=done>=LESSONS.length?'You learned every trick! Keep using the flip cards to stay sharp.':`${done} of ${LESSONS.length} tricks learned. Each new trick you learn earns 10 coins.`;
+  const box=$('#lessonList');box.innerHTML='';
+  LESSONS.forEach((l,i)=>{const b=document.createElement('button');const ok=S.learned.includes(l.id);b.className='lesson-btn'+(ok?' done':'');
+    b.innerHTML=`<span class="ico">${ok?'✅':l.icon}</span><span><b>${l.title}</b><small>${l.short}</small></span>`;
+    b.addEventListener('click',()=>{sfx.tap();openLesson(i)});box.appendChild(b)});
+  const fg=$('#flipGrid');fg.innerHTML='';
+  for(let n=1;n<=15;n++){const b=document.createElement('button');b.className='flip';b.innerHTML=`${n}<sup>2</sup>`;b.setAttribute('aria-label',`${n} squared, tap to reveal`);
+    b.addEventListener('click',()=>{sfx.tap();const s=b.classList.toggle('shown');b.innerHTML=s?String(n*n):`${n}<sup>2</sup>`});fg.appendChild(b)}
+}
+$('#hideAll').addEventListener('click',()=>{document.querySelectorAll('.flip').forEach((b,i)=>{b.classList.remove('shown');b.innerHTML=`${i+1}<sup>2</sup>`})});
+let LI=0;
+function openLesson(i){
+  LI=i;const l=LESSONS[i];go('lesson');
+  $('#lessonTitle').textContent=l.title;$('#lessonBody').innerHTML=l.body();if(l.init)l.init();
+  $('#checkQ').textContent=l.check.q;$('#checkFb').textContent='';
+  const o=$('#checkOpts');o.innerHTML='';
+  shuffle(l.check.opts).forEach(v=>{const b=document.createElement('button');b.className='opt';b.textContent=v;
+    b.addEventListener('click',()=>{
+      if(v===l.check.a){b.classList.add('right');sfx.ok();o.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+        let msg='✅ Yes! '+l.check.why;
+        if(!S.learned.includes(l.id)){S.learned.push(l.id);S.coins+=10;save();updatePills();sfx.coin();msg+=' You earned 10 coins!'}
+        $('#checkFb').textContent=msg;
+      }else{b.classList.add('wrong');b.disabled=true;sfx.bad();$('#checkFb').textContent='Not that one. Have another look at the trick above.'}
+    });o.appendChild(b)});
+  $('#nextLesson').textContent=i<LESSONS.length-1?'Next lesson':'Back to all lessons';
+}
+$('#nextLesson').addEventListener('click',()=>{sfx.tap();if(LI<LESSONS.length-1)openLesson(LI+1);else go('academy')});
+
+/* ================= START ================= */
+go('home');
+if(!S.welcomed){
+  S.welcomed=true;save();
+  openModal(`<div class="big-t" data-mood="happy">${turtleSVG(BYID.pebble)}</div><h2>Welcome to Pebble Lagoon!</h2>
+   <p>Pebble is the only turtle here so far. Thirty more are tangled in nets out at sea.</p>
+   <div class="tipbox" style="text-align:left">⭐ Every rescue mission has three turtles, one for each star. Win every star on every mission to bring them all home.<br><br>🧮 There’s no timer. Answer quickly for a speed bonus.<br><br>🪙 Spend the coins you earn on outfits, toys, furniture and treats.<br><br>💢 Some turtles are lovely and some are not. If two start fighting, press and hold one and drag them apart.</div>
+   <button class="btn" onclick="closeModal()">Let’s rescue some turtles</button>`);
+}
+</script>
+</body></html>
